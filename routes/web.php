@@ -14,9 +14,11 @@ use App\Http\Controllers\AuthController;
 |
 */
 
-Route::get('/api/get-csrf', [AuthController::class, 'getCsrfToken']);
+// Route::get('/api/get-csrf', [AuthController::class, 'getCsrfToken']);
+
 Route::post('/api/login', [AuthController::class, 'login']);
 Route::post('/api/register', [AuthController::class, 'register']);
+Route::get('/api/logout', [AuthController::class, 'logout']);
 
 Route::get('/api/logged-in-mate', function() {
     return 'Hey mate';

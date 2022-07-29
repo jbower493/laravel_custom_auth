@@ -52,4 +52,9 @@ class AuthController extends Controller
             'message' => 'Registration successful.'
         ];
     }
+
+    public function logout(Request $request)
+    {
+        return 'Cheers';
+    }
 }
