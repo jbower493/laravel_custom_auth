@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ListController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,10 +17,11 @@ use App\Http\Controllers\AuthController;
 
 // Route::get('/api/get-csrf', [AuthController::class, 'getCsrfToken']);
 
+// Auth
 Route::post('/api/login', [AuthController::class, 'login']);
 Route::post('/api/register', [AuthController::class, 'register']);
-Route::get('/api/logout', [AuthController::class, 'logout']);
+Route::get('/api/logout', [AuthController::class, 'logout'])->middleware('auth:web');
 
-Route::get('/api/logged-in-mate', function() {
-    return 'Hey mate';
-})->middleware('auth:web');
+// Lists
+Route::get('/api/list', [ListController::class, 'index'])->middleware('auth:web');
+Route::post('/api/list', [ListController::class, 'store'])->middleware('auth:web');
