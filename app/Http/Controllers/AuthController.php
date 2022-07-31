@@ -14,6 +14,19 @@ class AuthController extends Controller
         return '';
     }
 
+    public function getUser(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) return response([
+            'message' => 'No user is currently logged in.'
+        ], 401);
+
+        return [
+            'user' => $user
+        ];
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -29,9 +42,9 @@ class AuthController extends Controller
             ];
         }
  
-        return [
+        return response([
             'message' => 'Incorrect credentials.'
-        ];
+        ], 401);
     }
 
     public function register(Request $request)

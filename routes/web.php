@@ -18,6 +18,7 @@ use App\Http\Controllers\ListController;
 // Route::get('/api/get-csrf', [AuthController::class, 'getCsrfToken']);
 
 // Auth
+Route::get('/api/user', [AuthController::class, 'getUser']);
 Route::post('/api/login', [AuthController::class, 'login']);
 Route::post('/api/register', [AuthController::class, 'register']);
 Route::get('/api/logout', [AuthController::class, 'logout'])->middleware('auth:web');
