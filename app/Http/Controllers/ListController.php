@@ -14,7 +14,12 @@ class ListController extends Controller
 
         $lists = ShoppingList::all()->toArray();
 
-        return $lists;
+        return [
+            'message' => 'Successfully retreived lists.',
+            'data' => [
+                'lists' => $lists
+            ]
+        ];
     }
 
     public function store(Request $request)

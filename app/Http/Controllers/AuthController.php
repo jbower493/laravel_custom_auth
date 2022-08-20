@@ -19,11 +19,14 @@ class AuthController extends Controller
         $user = Auth::user();
 
         if (!$user) return response([
-            'message' => 'No user is currently logged in.'
+            'error' => 'No user is currently logged in.'
         ], 401);
 
         return [
-            'user' => $user
+            'message' => 'Successfully retreived user.',
+            'data' => [
+                'user' => $user
+            ]
         ];
     }
 
@@ -43,7 +46,7 @@ class AuthController extends Controller
         }
  
         return response([
-            'message' => 'Incorrect credentials.'
+            'error' => 'Incorrect credentials.'
         ], 401);
     }
 
