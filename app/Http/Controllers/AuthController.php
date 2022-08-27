@@ -19,7 +19,7 @@ class AuthController extends Controller
         $user = Auth::user();
 
         if (!$user) return response([
-            'error' => 'No user is currently logged in.'
+            'errors' => ['No user is currently logged in.']
         ], 401);
 
         return [
@@ -46,22 +46,22 @@ class AuthController extends Controller
         }
  
         return response([
-            'error' => 'Incorrect credentials.'
+            'errors' => ['Incorrect credentials.']
         ], 401);
     }
 
     public function register(Request $request)
     {
         $fields = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|unique:users,email',
-            'password' => 'required|string'
+            'name' => ['required', 'string'],
+            'email' => ['required', 'string', 'unique:users', 'email'],
+            'password' => ['required', 'string']
         ]);
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password)
+            'name' => $fields['name'],
+            'email' => $fields['email'],
+            'password' => Hash::make($fields['password'])
         ]);
 
         return [

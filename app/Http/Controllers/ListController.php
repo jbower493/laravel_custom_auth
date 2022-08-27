@@ -26,10 +26,14 @@ class ListController extends Controller
     {
         $loggedInUserId = Auth::id();
 
-        $list = new ShoppingList;
+        $validatedList = $request->validate([
+            'name' => ['required']
+        ]);
 
-        $list->name = $request->name;
-        $list->user_id = $loggedInUserId;
+        $list = ShoppingList::create([
+            'name' => $validatedList['name'],
+            'user_id' => $loggedInUserId
+        ]);
 
         $list->save();
 

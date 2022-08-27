@@ -10,4 +10,9 @@ class ShoppingList extends Model
     use HasFactory;
 
     protected $table = 'lists';
+
+    protected $fillable = [
+        'name',
+        'user_id'
+    ];
 }
