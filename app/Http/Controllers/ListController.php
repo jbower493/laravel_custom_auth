@@ -41,4 +41,15 @@ class ListController extends Controller
             'message' => 'List successfully created.'
         ];
     }
+
+    public function delete(Request $request, $id)
+    {
+        $list = ShoppingList::find($id);
+
+        $list->delete();
+
+        return [
+            'message' => 'List successfully deleted.'
+        ];
+    }
 }

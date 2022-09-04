@@ -26,3 +26,4 @@ Route::get('/api/logout', [AuthController::class, 'logout'])->middleware('auth:w
 // Lists
 Route::get('/api/list', [ListController::class, 'index'])->middleware('auth:web');
 Route::post('/api/list', [ListController::class, 'store'])->middleware('auth:web');
+Route::delete('/api/list/{id}', [ListController::class, 'delete'])->middleware('auth:web');
