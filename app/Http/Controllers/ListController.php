@@ -52,4 +52,22 @@ class ListController extends Controller
             'message' => 'List successfully deleted.'
         ];
     }
+
+    public function singleList(Request $request, $id)
+    {
+        $list = ShoppingList::find($id);
+
+        if (!$list) {
+            return response([
+                'errors' => ['Could not find list with the requested id.']
+            ], 404);
+        }
+
+        return [
+            'message' => 'List successfully deleted.',
+            'data' => [
+                'list' => $list
+            ]
+        ];
+    }
 }
