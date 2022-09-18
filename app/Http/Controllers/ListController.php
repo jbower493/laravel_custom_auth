@@ -63,11 +63,49 @@ class ListController extends Controller
             ], 404);
         }
 
+        $items = $list->items()->get()->toArray();
+
+        $list->items = $items;
+
         return [
-            'message' => 'List successfully deleted.',
+            'message' => 'List successfully fetched.',
             'data' => [
                 'list' => $list
             ]
+        ];
+    }
+
+    public function addItem(Request $request, $id)
+    {
+        $list = ShoppingList::find($id);
+
+        if (!$list) {
+            return response([
+                'errors' => ['Could not find list with the requested id.']
+            ], 404);
+        }
+
+        $list->items()->attach($request->item_id);
+
+        return [
+            'message' => 'Item successfully added to list.'
+        ];
+    }
+
+    public function removeItem(Request $request, $id)
+    {
+        $list = ShoppingList::find($id);
+
+        if (!$list) {
+            return response([
+                'errors' => ['Could not find list with the requested id.']
+            ], 404);
+        }
+
+        $list->items()->detach($request->item_id);
+
+        return [
+            'message' => 'Item successfully removed from list.'
         ];
     }
 }

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ListController;
+use App\Http\Controllers\ItemController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,3 +29,10 @@ Route::get('/api/list', [ListController::class, 'index'])->middleware('auth:web'
 Route::post('/api/list', [ListController::class, 'store'])->middleware('auth:web');
 Route::delete('/api/list/{id}', [ListController::class, 'delete'])->middleware('auth:web');
 Route::get('/api/list/{id}', [ListController::class, 'singleList'])->middleware('auth:web');
+Route::post('/api/list/{id}/add-item', [ListController::class, 'addItem'])->middleware('auth:web');
+Route::post('/api/list/{id}/remove-item', [ListController::class, 'removeItem'])->middleware('auth:web');
+
+// Items
+Route::get('/api/item', [ItemController::class, 'index'])->middleware('auth:web');
+Route::post('/api/item', [ItemController::class, 'store'])->middleware('auth:web');
+Route::delete('/api/item/{id}', [ItemController::class, 'delete'])->middleware('auth:web');
