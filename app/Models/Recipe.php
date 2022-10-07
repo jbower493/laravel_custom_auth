@@ -6,22 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Item;
 
-class ShoppingList extends Model
+class Recipe extends Model
 {
     use HasFactory;
 
-    protected $table = 'lists';
+    // When protected property "$table" is not specified, the model will use the table name that is the plural of the model name, so in this instance "recipes"
 
     protected $fillable = [
         'name',
         'user_id'
     ];
 
-    /**
-     * The items that belong to a shopping list.
-     */
     public function items()
     {
-        return $this->belongsToMany(Item::class, 'list_item', 'list_id', 'item_id');
+        return $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id');
     }
 }

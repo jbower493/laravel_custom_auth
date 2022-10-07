@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ItemController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         $loggedInUserId = Auth::id();
 
@@ -42,9 +42,9 @@ class ItemController extends Controller
         ];
     }
 
-    public function delete(Request $request, $id)
+    public function delete($id)
     {
-        $item = item::find($id);
+        $item = Item::find($id);
 
         $item->delete();
 

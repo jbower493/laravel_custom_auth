@@ -18,8 +18,8 @@ class Item extends Model
     /**
      * The list that an item appears in.
      */
-    public function items()
-    {
-        return $this->belongsToMany(ShoppingList::class, 'item_list', 'item_id', 'list_id');
-    }
+    // public function lists()
+    // {
+    //     return $this->belongsToMany(ShoppingList::class, 'list_item', 'item_id', 'list_id');
+    // }
 }

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ListController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         $loggedInUserId = Auth::id();
 
@@ -42,7 +42,7 @@ class ListController extends Controller
         ];
     }
 
-    public function delete(Request $request, $id)
+    public function delete($id)
     {
         $list = ShoppingList::find($id);
 
@@ -53,7 +53,7 @@ class ListController extends Controller
         ];
     }
 
-    public function singleList(Request $request, $id)
+    public function singleList($id)
     {
         $list = ShoppingList::find($id);
 
