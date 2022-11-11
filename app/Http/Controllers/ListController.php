@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ShoppingList;
+use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
 
 class ListController extends Controller
@@ -90,6 +91,46 @@ class ListController extends Controller
         return [
             'message' => 'Item successfully added to list.'
         ];
+    }
+
+    public function addItemByName(Request $request, $id)
+    {
+        $list = ShoppingList::find($id);
+
+        if (!$list) {
+            return response([
+                'errors' => ['Could not find list with the requested id.']
+            ], 404);
+        }
+
+        $validatedNewItem = $request->validate([
+            'item_name' => ['required']
+        ]);
+
+        $existingItem = Item::where('name', $validatedNewItem['item_name'])->first();
+
+        if ($existingItem) {
+            $list->items()->attach($existingItem['id']);
+
+            return [
+                'message' => 'Item successfully added to list.'
+            ];
+        } else {
+            $loggedInUserId = Auth::id();
+
+            $item = Item::create([
+                'name' => $validatedNewItem['item_name'],
+                'user_id' => $loggedInUserId
+            ]);
+    
+            $item->save();
+
+            $list->items()->attach($item['id']);
+
+            return [
+                'message' => 'Item successfully created and added to list.'
+            ];
+        }
     }
 
     public function removeItem(Request $request, $id)
