@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RecipeController extends Controller
 {
@@ -46,6 +47,9 @@ class RecipeController extends Controller
     public function delete($id)
     {
         $recipe = Recipe::find($id);
+
+        // Remove all items from recipe before deleting
+        DB::table('list_item')->where('list_id', $recipe['id'])->delete();
 
         $recipe->delete();
 
