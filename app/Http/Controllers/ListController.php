@@ -81,7 +81,7 @@ class ListController extends Controller
         ];
     }
 
-    public function addItemByName(Request $request, $id)
+    public function addItem(Request $request, $id)
     {
         $list = ShoppingList::find($id);
 

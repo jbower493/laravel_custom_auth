@@ -76,7 +76,7 @@ class RecipeController extends Controller
         ];
     }
 
-    public function addItemByName(Request $request, $id)
+    public function addItem(Request $request, $id)
     {
         $recipe = Recipe::find($id);
 
