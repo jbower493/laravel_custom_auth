@@ -46,6 +46,10 @@ class ItemController extends Controller
     {
         $item = Item::find($id);
 
+        // Remove from all lists and recipes before deleting
+        $item->removeFromAllLists();
+        $item->removeFromAllRecipes();
+
         $item->delete();
 
         return [

@@ -94,10 +94,29 @@ class ListController extends Controller
             'item_name' => ['required']
         ]);
 
+
+        $currentListItems = $list->items();
+
         $existingItem = Item::where('name', $validatedNewItem['item_name'])->first();
 
         if ($existingItem) {
-            $list->items()->attach($existingItem['id']);
+            // Check for duplicate in list
+            $isDuplicate = false;
+
+            foreach ($currentListItems->get()->toArray() as &$item) {
+                if ($item['name'] === $validatedNewItem['item_name']) {
+                    $isDuplicate = true;
+                    break;
+                }
+            }
+
+            if ($isDuplicate) {
+                return response([
+                    'errors' => ['Item is already in this list. Change the quantity to add more.']
+                ], 400);
+            }
+
+            $currentListItems->attach($existingItem['id']);
 
             return [
                 'message' => 'Item successfully added to list.'
@@ -112,7 +131,7 @@ class ListController extends Controller
     
             $item->save();
 
-            $list->items()->attach($item['id']);
+            $currentListItems->attach($item['id']);
 
             return [
                 'message' => 'Item successfully created and added to list.'

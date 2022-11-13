@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\ShoppingList;
+use Illuminate\Support\Facades\DB;
 
 class Item extends Model
 {
@@ -15,11 +15,13 @@ class Item extends Model
         'user_id'
     ];
 
-    /**
-     * The list that an item appears in.
-     */
-    // public function lists()
-    // {
-    //     return $this->belongsToMany(ShoppingList::class, 'list_item', 'item_id', 'list_id');
-    // }
+    public function removeFromAllLists()
+    {
+        DB::table('list_item')->where('item_id', $this->id)->delete();
+    }
+
+    public function removeFromAllRecipes()
+    {
+        DB::table('recipe_item')->where('item_id', $this->id)->delete();
+    }
 }
