@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Recipe;
+use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
 
 class RecipeController extends Controller
@@ -75,7 +76,7 @@ class RecipeController extends Controller
         ];
     }
 
-    public function addItem(Request $request, $id)
+    public function addItemByName(Request $request, $id)
     {
         $recipe = Recipe::find($id);
 
@@ -85,11 +86,34 @@ class RecipeController extends Controller
             ], 404);
         }
 
-        $recipe->items()->attach($request->item_id);
+        $validatedNewItem = $request->validate([
+            'item_name' => ['required']
+        ]);
 
-        return [
-            'message' => 'Item successfully added to recipe.'
-        ];
+        $existingItem = Item::where('name', $validatedNewItem['item_name'])->first();
+
+        if ($existingItem) {
+            $recipe->items()->attach($existingItem['id']);
+
+            return [
+                'message' => 'Item successfully added to recipe.'
+            ];
+        } else {
+            $loggedInUserId = Auth::id();
+
+            $item = Item::create([
+                'name' => $validatedNewItem['item_name'],
+                'user_id' => $loggedInUserId
+            ]);
+    
+            $item->save();
+
+            $recipe->items()->attach($item['id']);
+
+            return [
+                'message' => 'Item successfully created and added to recipe.'
+            ];
+        }
     }
 
     public function removeItem(Request $request, $id)

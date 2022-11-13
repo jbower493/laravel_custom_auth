@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ShoppingList;
 use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ListController extends Controller
 {
@@ -44,8 +45,12 @@ class ListController extends Controller
     }
 
     public function delete($id)
+    // TODO move the "clear list" into its own method on the list model
     {
         $list = ShoppingList::find($id);
+
+        // Remove all items from list before deleting
+        DB::table('list_item')->where('list_id', $list['id'])->delete();
 
         $list->delete();
 
@@ -73,23 +78,6 @@ class ListController extends Controller
             'data' => [
                 'list' => $list
             ]
-        ];
-    }
-
-    public function addItem(Request $request, $id)
-    {
-        $list = ShoppingList::find($id);
-
-        if (!$list) {
-            return response([
-                'errors' => ['Could not find list with the requested id.']
-            ], 404);
-        }
-
-        $list->items()->attach($request->item_id);
-
-        return [
-            'message' => 'Item successfully added to list.'
         ];
     }
 
