@@ -93,10 +93,28 @@ class RecipeController extends Controller
             'item_name' => ['required']
         ]);
 
+        $currentRecipeItems = $recipe->items();
+
         $existingItem = Item::where('name', $validatedNewItem['item_name'])->first();
 
         if ($existingItem) {
-            $recipe->items()->attach($existingItem['id']);
+            // Check for duplicate in list
+            $isDuplicate = false;
+
+            foreach ($currentRecipeItems->get()->toArray() as &$item) {
+                if ($item['name'] === $validatedNewItem['item_name']) {
+                    $isDuplicate = true;
+                    break;
+                }
+            }
+
+            if ($isDuplicate) {
+                return response([
+                    'errors' => ['Item is already in this recipe. Change the quantity to add more.']
+                ], 400);
+            }
+
+            $currentRecipeItems->attach($existingItem['id']);
 
             return [
                 'message' => 'Item successfully added to recipe.'
@@ -111,7 +129,7 @@ class RecipeController extends Controller
     
             $item->save();
 
-            $recipe->items()->attach($item['id']);
+            $currentRecipeItems->attach($item['id']);
 
             return [
                 'message' => 'Item successfully created and added to recipe.'
