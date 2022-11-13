@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Item;
+use Illuminate\Support\Facades\DB;
 
 class Recipe extends Model
 {
@@ -20,5 +21,10 @@ class Recipe extends Model
     public function items()
     {
         return $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id');
+    }
+
+    public function removeAllItems()
+    {
+        DB::table('recipe_item')->where('recipe_id', $this->id)->delete();
     }
 }

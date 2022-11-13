@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\ShoppingList;
 use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ListController extends Controller
 {
@@ -50,7 +49,7 @@ class ListController extends Controller
         $list = ShoppingList::find($id);
 
         // Remove all items from list before deleting
-        DB::table('list_item')->where('list_id', $list['id'])->delete();
+        $list->removeAllItems();
 
         $list->delete();
 
