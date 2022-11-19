@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ShoppingList;
 use App\Models\Item;
+use App\Models\Recipe;
 use Illuminate\Support\Facades\Auth;
 
 class ListController extends Controller
@@ -154,5 +155,38 @@ class ListController extends Controller
         return [
             'message' => 'Item successfully removed from list.'
         ];
+    }
+
+    public function addFromRecipe(Request $request, $id)
+    {
+        $list = ShoppingList::find($id);
+
+        if (!$list) {
+            return response([
+                'errors' => ['Could not find list with the requested id.']
+            ], 404);
+        }
+
+        $validatedRecipe = $request->validate([
+            'recipe_id' => ['required']
+        ]);
+
+        $recipe = Recipe::find($validatedRecipe['recipe_id']);
+
+        if (!$recipe) {
+            return response([
+                'errors' => ['Could not find recipe with the requested id.']
+            ], 404);
+        }
+
+        $recipeItems = $recipe->items()->get()->toArray();
+
+        foreach ($recipeItems as $item) {
+            $list->items()->attach($item['id']);
+        }
+        
+        return [
+            'message' => 'Items from recipe successfully added to list.'
+        ]; 
     }
 }
