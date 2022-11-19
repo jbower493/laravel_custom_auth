@@ -13,7 +13,7 @@ class ListController extends Controller
     {
         $loggedInUserId = Auth::id();
 
-        $lists = ShoppingList::where('user_id', $loggedInUserId)->get()->toArray();
+        $lists = ShoppingList::where('user_id', $loggedInUserId)->orderBy('created_at', 'desc')->get()->toArray();
 
         return [
             'message' => 'Successfully retreived lists.',
