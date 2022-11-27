@@ -30,4 +30,34 @@ class ShoppingList extends Model
     {
         DB::table('list_item')->where('list_id', $this->id)->delete();
     }
+
+    /**
+     * Take an existing item and safely add it to a list, first checking that it doesn't already exist in the list
+     */
+    public function addItem($itemId, $itemName) {
+        $currentListItems = $this->items();
+
+        // Check for duplicate in list
+        $isDuplicate = false;
+
+        foreach ($currentListItems->get()->toArray() as &$item) {
+            if ($item['name'] === $itemName) {
+                $isDuplicate = true;
+                break;
+            }
+        }
+
+        if ($isDuplicate) {
+            return [
+                'success' => false,
+                'error' => 'Item is already in this list. Change the quantity to add more.'
+            ];
+        }
+
+        $currentListItems->attach($itemId);
+
+        return [
+            'success' => true
+        ];
+    }
 }

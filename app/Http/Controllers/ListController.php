@@ -95,33 +95,20 @@ class ListController extends Controller
             'item_name' => ['required']
         ]);
 
-
-        $currentListItems = $list->items();
-
         $existingItem = Item::where('name', $validatedNewItem['item_name'])->first();
 
         if ($existingItem) {
-            // Check for duplicate in list
-            $isDuplicate = false;
+            $result = $list->addItem($existingItem['id'], $existingItem['name']);
 
-            foreach ($currentListItems->get()->toArray() as &$item) {
-                if ($item['name'] === $validatedNewItem['item_name']) {
-                    $isDuplicate = true;
-                    break;
-                }
+            if ($result['success']) {
+                return [
+                    'message' => 'Item successfully added to list.'
+                ];
             }
 
-            if ($isDuplicate) {
-                return response([
-                    'errors' => ['Item is already in this list. Change the quantity to add more.']
-                ], 400);
-            }
-
-            $currentListItems->attach($existingItem['id']);
-
-            return [
-                'message' => 'Item successfully added to list.'
-            ];
+            return response([
+                'errors' => [$result['error']]
+            ], 404);
         } else {
             $loggedInUserId = Auth::id();
 
@@ -132,11 +119,17 @@ class ListController extends Controller
     
             $item->save();
 
-            $currentListItems->attach($item['id']);
+            $result = $list->addItem($item['id'], $item['name']);
 
-            return [
-                'message' => 'Item successfully created and added to list.'
-            ];
+            if ($result['success']) {
+                return [
+                    'message' => 'Item successfully created and added to list.'
+                ];
+            }
+
+            return response([
+                'errors' => [$result['error']]
+            ], 404);
         }
     }
 
@@ -181,12 +174,18 @@ class ListController extends Controller
 
         $recipeItems = $recipe->items()->get()->toArray();
 
+        $someAlreadyOnList = false;
+
         foreach ($recipeItems as $item) {
-            $list->items()->attach($item['id']);
+            $result = $list->addItem($item['id'], $item['name']);
+
+            if (!$result['success']) {
+                $someAlreadyOnList = true;
+            }
         }
         
         return [
-            'message' => 'Items from recipe successfully added to list.'
+            'message' => $someAlreadyOnList ? "Items from recipe successfully added to list (some we're already on the list)." : 'Items from recipe successfully added to list.'
         ]; 
     }
 }
