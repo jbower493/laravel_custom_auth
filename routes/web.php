@@ -30,6 +30,7 @@ Route::get('/api/logout', [AuthController::class, 'logout'])->middleware('auth:w
 Route::get('/api/item', [ItemController::class, 'index'])->middleware('auth:web');
 Route::post('/api/item', [ItemController::class, 'store'])->middleware('auth:web');
 Route::delete('/api/item/{id}', [ItemController::class, 'delete'])->middleware('auth:web');
+Route::put('/api/item/{id}/category', [ItemController::class, 'assignToCategory'])->middleware('auth:web');
 
 // Lists
 Route::get('/api/list', [ListController::class, 'index'])->middleware('auth:web');

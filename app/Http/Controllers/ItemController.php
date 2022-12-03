@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ItemController extends Controller
 {
@@ -26,12 +27,20 @@ class ItemController extends Controller
     {
         $loggedInUserId = Auth::id();
 
-        $validatedItem = $request->validate([
-            'name' => ['required']
-        ]);
+        $validatedItem = Validator::make(
+            [
+                'name' => $request['name'],
+                'category_id' => $request['category_id'] ?? null
+            ],
+            [
+                'name' => ['required'],
+                'category_id' => ['nullable', 'integer']
+            ]
+        )->validate();
 
         $item = Item::create([
             'name' => $validatedItem['name'],
+            'category_id' => $validatedItem['category_id'],
             'user_id' => $loggedInUserId
         ]);
 
@@ -54,6 +63,27 @@ class ItemController extends Controller
 
         return [
             'message' => 'Item successfully deleted.'
+        ];
+    }
+
+    public function assignToCategory($itemId, Request $request)
+    {
+        $item = Item::find($itemId);
+
+        $validatedRequest = $request->validate([
+            'category_id' => ['required', 'integer']
+        ]);
+
+        $result = $item->assignToCategory($validatedRequest['category_id']);
+
+        if (!$result['success']) {
+            return response([
+                'errors' => [$result['error']]
+            ], 404);
+        }
+
+        return [
+            'message' => 'Item successfully assigned to category.'
         ];
     }
 }
