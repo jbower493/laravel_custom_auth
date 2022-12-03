@@ -14,7 +14,12 @@ class CategoryController extends Controller
 
         $categories = Category::where('user_id', $loggedInUserId)->orderBy('created_at', 'desc')->get()->toArray();
 
-        return $categories;
+        return [
+            'message' => 'Successfully retreived categories.',
+            'data' => [
+                'categories' => $categories
+            ]
+        ];
     }
 
     public function store(Request $request)
