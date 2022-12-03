@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ListController;
 use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,3 +47,8 @@ Route::delete('/api/recipe/{id}', [RecipeController::class, 'delete'])->middlewa
 Route::get('/api/recipe/{id}', [RecipeController::class, 'singleRecipe'])->middleware('auth:web');
 Route::post('/api/recipe/{id}/add-item', [RecipeController::class, 'addItem'])->middleware('auth:web');
 Route::post('/api/recipe/{id}/remove-item', [RecipeController::class, 'removeItem'])->middleware('auth:web');
+
+// Categories
+Route::get('/api/category', [CategoryController::class, 'index'])->middleware('auth:web');
+Route::post('/api/category', [CategoryController::class, 'store'])->middleware('auth:web');
+Route::delete('/api/category/{id}', [CategoryController::class, 'delete'])->middleware('auth:web');
