@@ -17,6 +17,17 @@ class Item extends Model
         'user_id'
     ];
 
+    // Eager load the item's category by default
+    protected $with = ['category'];
+
+    // Omits the "category_id" from any collection of Items that is retrieved
+    protected $hidden = ['category_id'];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
     public function removeFromAllLists()
     {
         DB::table('list_item')->where('item_id', $this->id)->delete();

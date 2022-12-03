@@ -13,7 +13,8 @@ class ItemController extends Controller
     {
         $loggedInUserId = Auth::id();
 
-        $items = Item::where('user_id', $loggedInUserId)->orderBy('name') ->get()->toArray();
+        $items = Item::where('user_id', $loggedInUserId)->orderBy('name')->get()->toArray();
+        // $items = Item::with('category')->where('user_id', $loggedInUserId)->orderBy('name')->get()->toArray();
 
         return [
             'message' => 'Successfully retreived items.',
