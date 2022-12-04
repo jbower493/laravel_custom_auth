@@ -86,4 +86,20 @@ class ItemController extends Controller
             'message' => 'Item successfully assigned to category.'
         ];
     }
+
+    public function bulkAssignCategory(Request $request)
+    {
+        $validatedRequest = $request->validate([
+            'category_id' => ['nullable', 'integer'],
+            'item_ids.*' => ['required', 'integer'],
+        ]);
+
+        Item::whereIn('id', $validatedRequest['item_ids'])->update([
+            'category_id' => $validatedRequest['category_id']
+        ]);
+
+        return [
+            'message' => 'Items successfully assigned to category.'
+        ];
+    }
 }
