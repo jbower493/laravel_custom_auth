@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ShoppingList;
 use App\Models\Item;
 use App\Models\Recipe;
+use App\Models\Menu;
 use Illuminate\Support\Facades\Auth;
 
 class ListController extends Controller
@@ -164,28 +165,64 @@ class ListController extends Controller
             'recipe_id' => ['required']
         ]);
 
-        $recipe = Recipe::find($validatedRecipe['recipe_id']);
+        $result = $list->addItemsFromRecipe($validatedRecipe['recipe_id']);
 
-        if (!$recipe) {
+        if (!$result['success']) {
             return response([
-                'errors' => ['Could not find recipe with the requested id.']
+                'errors' => [$result['error']]
             ], 404);
         }
 
-        $recipeItems = $recipe->items()->get()->toArray();
+        return [
+            'message' => $result['some_already_on_list'] ? "Items from recipe successfully added to list (some we're already on the list)." : 'Items from recipe successfully added to list.'
+        ]; 
+    }
+
+    public function addFromMenu(Request $request, $id)
+    {
+        $list = ShoppingList::find($id);
+
+        if (!$list) {
+            return response([
+                'errors' => ['Could not find list with the requested id.']
+            ], 404);
+        }
+
+        $validatedMenu = $request->validate([
+            'menu_id' => ['required', 'integer']
+        ]);
+
+        $menu = Menu::find($validatedMenu['menu_id']);
+
+        if (!$menu) {
+            return response([
+                'errors' => ['Could not find menu with the requested id.']
+            ], 404);
+        }
+
+        // Now we have the list and the menu
+
+        // loop through all the recipes in the menu, and add them to the list
+        $menuRecipes = $menu->recipes()->get()->toArray();
 
         $someAlreadyOnList = false;
 
-        foreach ($recipeItems as $item) {
-            $result = $list->addItem($item['id'], $item['name']);
+        foreach ($menuRecipes as $recipe) {
+            $result = $list->addItemsFromRecipe($recipe['id']);
 
-            if (!$result['success']) {
+            if ($result['some_already_on_list']) {
                 $someAlreadyOnList = true;
             }
+
+            if (!$result['success']) {
+                return response([
+                    'errors' => [$result['error']]
+                ], 404);
+            }
         }
-        
+
         return [
-            'message' => $someAlreadyOnList ? "Items from recipe successfully added to list (some we're already on the list)." : 'Items from recipe successfully added to list.'
+            'message' => $someAlreadyOnList ? "Items from menu successfully added to list (some we're already on the list)." : 'Items from menu successfully added to list.'
         ]; 
     }
 }

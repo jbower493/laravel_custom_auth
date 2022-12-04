@@ -60,4 +60,33 @@ class ShoppingList extends Model
             'success' => true
         ];
     }
+
+    public function addItemsFromRecipe($recipeId)
+    {
+        $recipe = Recipe::find($recipeId);
+
+        if (!$recipe) {
+            return [
+                'success' => false,
+                'error' => 'Could not find recipe with requested id.'
+            ];
+        }
+
+        $recipeItems = $recipe->items()->get()->toArray();
+
+        $someAlreadyOnList = false;
+
+        foreach ($recipeItems as $item) {
+            $result = $this->addItem($item['id'], $item['name']);
+
+            if (!$result['success']) {
+                $someAlreadyOnList = true;
+            }
+        }
+
+        return [
+            'success' => true,
+            'some_already_on_list' => $someAlreadyOnList
+        ];
+    }
 }
