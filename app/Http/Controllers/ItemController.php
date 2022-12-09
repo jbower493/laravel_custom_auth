@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Item;
+use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -51,10 +52,8 @@ class ItemController extends Controller
         ];
     }
 
-    public function delete($id)
+    public function delete(Item $item)
     {
-        $item = Item::find($id);
-
         // Remove from all lists and recipes before deleting
         $item->removeFromAllLists();
         $item->removeFromAllRecipes();
@@ -66,36 +65,50 @@ class ItemController extends Controller
         ];
     }
 
-    public function assignToCategory($itemId, Request $request)
+    public function bulkAssignCategory(Request $request, $categoryId)
     {
-        $item = Item::find($itemId);
+        $categoryIdToSet = null;
 
-        $validatedRequest = $request->validate([
-            'category_id' => ['required', 'integer']
-        ]);
+        $loggedInUserId = Auth::id();
 
-        $result = $item->assignToCategory($validatedRequest['category_id']);
+        // If category id is -1, set the items to uncategorized
+        if ($categoryId != -1) {
+            $category = Category::find($categoryId);
 
-        if (!$result['success']) {
-            return response([
-                'errors' => [$result['error']]
-            ], 404);
+            // If no category with that id
+            if (!$category) {
+                return response([
+                    'errors' => ["No category with this id exists."]
+                ], 404);
+            }
+
+            // If the category doesnt belong to the user
+            if ($category->user_id !== $loggedInUserId) {
+                return response([
+                    'errors' => ["You are not authorized to access this resource."]
+                ], 403);
+            }
+
+            $categoryIdToSet = $category->id;
         }
 
-        return [
-            'message' => 'Item successfully assigned to category.'
-        ];
-    }
-
-    public function bulkAssignCategory(Request $request)
-    {
         $validatedRequest = $request->validate([
-            'category_id' => ['nullable', 'integer'],
             'item_ids.*' => ['required', 'integer'],
         ]);
 
+        // Validate that all items are owned by the user        
+        $items = Item::whereIn('id', $validatedRequest['item_ids'])->get()->toArray();
+
+        foreach ($items as $item) {
+            if ($item['user_id'] !== $loggedInUserId) {
+                return response([
+                    'errors' => ["You are not authorized to access this resource."]
+                ], 403);
+            }
+        }
+
         Item::whereIn('id', $validatedRequest['item_ids'])->update([
-            'category_id' => $validatedRequest['category_id']
+            'category_id' => $categoryIdToSet
         ]);
 
         return [

@@ -30,37 +30,51 @@ Route::get('/api/logout', [AuthController::class, 'logout'])->middleware('auth:w
 // Items
 Route::get('/api/item', [ItemController::class, 'index'])->middleware('auth:web');
 Route::post('/api/item', [ItemController::class, 'store'])->middleware('auth:web');
-Route::delete('/api/item/{id}', [ItemController::class, 'delete'])->middleware('auth:web');
-Route::put('/api/item/{id}/category', [ItemController::class, 'assignToCategory'])->middleware('auth:web');
-Route::put('/api/item/category/bulk', [ItemController::class, 'bulkAssignCategory'])->middleware('auth:web');
+Route::delete('/api/item/{item}', [ItemController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,item');
+Route::put('/api/item/category/{categoryId}/bulk', [ItemController::class, 'bulkAssignCategory'])->middleware('auth:web');
 
 // Lists
 Route::get('/api/list', [ListController::class, 'index'])->middleware('auth:web');
 Route::post('/api/list', [ListController::class, 'store'])->middleware('auth:web');
-Route::delete('/api/list/{id}', [ListController::class, 'delete'])->middleware('auth:web');
-Route::get('/api/list/{id}', [ListController::class, 'singleList'])->middleware('auth:web');
-Route::post('/api/list/{id}/add-item', [ListController::class, 'addItem'])->middleware('auth:web');
-Route::post('/api/list/{id}/remove-item', [ListController::class, 'removeItem'])->middleware('auth:web');
-Route::post('/api/list/{id}/add-from-recipe', [ListController::class, 'addFromRecipe'])->middleware('auth:web');
-Route::post('/api/list/{id}/add-from-menu', [ListController::class, 'addFromMenu'])->middleware('auth:web');
+Route::delete('/api/list/{list}', [ListController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,list');
+Route::get('/api/list/{list}', [ListController::class, 'singleList'])->middleware('auth:web')->middleware('can:view,list');
+Route::post('/api/list/{list}/add-item', [ListController::class, 'addItem'])->middleware('auth:web')->middleware('can:update,list');
+Route::post('/api/list/{list}/remove-item', [ListController::class, 'removeItem'])->middleware('auth:web')->middleware('can:update,list');
+Route::post('/api/list/{list}/add-from-recipe/{recipe}', [ListController::class, 'addFromRecipe'])
+    ->middleware('auth:web')
+    ->middleware('can:update,list')
+    ->middleware('can:update,recipe');
+Route::post('/api/list/{list}/add-from-menu/{menu}', [ListController::class, 'addFromMenu'])
+    ->middleware('auth:web')
+    ->middleware('can:update,list')
+    ->middleware('can:update,menu');
 
 // Recipe
 Route::get('/api/recipe', [RecipeController::class, 'index'])->middleware('auth:web');
 Route::post('/api/recipe', [RecipeController::class, 'store'])->middleware('auth:web');
+// TODO: authorize
 Route::delete('/api/recipe/{id}', [RecipeController::class, 'delete'])->middleware('auth:web');
+// TODO: authorize
 Route::get('/api/recipe/{id}', [RecipeController::class, 'singleRecipe'])->middleware('auth:web');
+// TODO: authorize
 Route::post('/api/recipe/{id}/add-item', [RecipeController::class, 'addItem'])->middleware('auth:web');
+// TODO: authorize
 Route::post('/api/recipe/{id}/remove-item', [RecipeController::class, 'removeItem'])->middleware('auth:web');
 
 // Menu
 Route::get('/api/menu', [MenuController::class, 'index'])->middleware('auth:web');
 Route::post('/api/menu', [MenuController::class, 'store'])->middleware('auth:web');
+// TODO: authorize
 Route::delete('/api/menu/{id}', [MenuController::class, 'delete'])->middleware('auth:web');
+// TODO: authorize
 Route::get('/api/menu/{id}', [MenuController::class, 'singleMenu'])->middleware('auth:web');
+// TODO: authorize
 Route::post('/api/menu/{id}/add-recipe', [MenuController::class, 'addRecipe'])->middleware('auth:web');
+// TODO: authorize
 Route::post('/api/menu/{id}/remove-recipe', [MenuController::class, 'removeRecipe'])->middleware('auth:web');
 
 // Categories
 Route::get('/api/category', [CategoryController::class, 'index'])->middleware('auth:web');
 Route::post('/api/category', [CategoryController::class, 'store'])->middleware('auth:web');
+// TODO: authorize
 Route::delete('/api/category/{id}', [CategoryController::class, 'delete'])->middleware('auth:web');

@@ -19,7 +19,7 @@ return new class extends Migration
             // First, remove all duplicate entries
             $allRows = DB::table('list_item')->get();
 
-            foreach($allRows as $row) {
+            foreach ($allRows as $row) {
                 $rowArr = get_object_vars($row);
                 $rowListId = $rowArr['list_id'];
                 $rowItemId = $rowArr['item_id'];
@@ -28,7 +28,7 @@ return new class extends Migration
                 $duplicates = DB::table('list_item')->where('list_id', $rowListId)->where('item_id', $rowItemId)->get();
 
                 if (count($duplicates) > 1) {
-                    foreach($duplicates as $index => $duplicate)
+                    foreach ($duplicates as $index => $duplicate)
                     // Don't remove the first entry
                     if ($index != 0) {
                         $duplicateArr = get_object_vars($duplicate);
@@ -47,7 +47,7 @@ return new class extends Migration
             // First, remove all duplicate entries
             $allRows = DB::table('recipe_item')->get();
 
-            foreach($allRows as $row) {
+            foreach ($allRows as $row) {
                 $rowArr = get_object_vars($row);
                 $rowListId = $rowArr['recipe_id'];
                 $rowItemId = $rowArr['item_id'];
@@ -56,7 +56,7 @@ return new class extends Migration
                 $duplicates = DB::table('recipe_item')->where('recipe_id', $rowListId)->where('item_id', $rowItemId)->get();
 
                 if (count($duplicates) > 1) {
-                    foreach($duplicates as $index => $duplicate)
+                    foreach ($duplicates as $index => $duplicate)
                     // Don't remove the first entry
                     if ($index != 0) {
                         $duplicateArr = get_object_vars($duplicate);

@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ShoppingList;
-use App\Models\Item;
 use App\Models\Recipe;
+use App\Models\Item;
 use App\Models\Menu;
 use Illuminate\Support\Facades\Auth;
 
@@ -45,11 +45,8 @@ class ListController extends Controller
         ];
     }
 
-    public function delete($id)
-    // TODO move the "clear list" into its own method on the list model
+    public function delete(ShoppingList $list)
     {
-        $list = ShoppingList::find($id);
-
         // Remove all items from list before deleting
         $list->removeAllItems();
 
@@ -60,16 +57,8 @@ class ListController extends Controller
         ];
     }
 
-    public function singleList($id)
+    public function singleList(ShoppingList $list)
     {
-        $list = ShoppingList::find($id);
-
-        if (!$list) {
-            return response([
-                'errors' => ['Could not find list with the requested id.']
-            ], 404);
-        }
-
         $items = $list->items()->get()->toArray();
 
         $list->items = $items;
@@ -82,21 +71,15 @@ class ListController extends Controller
         ];
     }
 
-    public function addItem(Request $request, $id)
+    public function addItem(Request $request, ShoppingList $list)
     {
-        $list = ShoppingList::find($id);
-
-        if (!$list) {
-            return response([
-                'errors' => ['Could not find list with the requested id.']
-            ], 404);
-        }
-
         $validatedNewItem = $request->validate([
             'item_name' => ['required']
         ]);
 
-        $existingItem = Item::where('name', $validatedNewItem['item_name'])->first();
+        $loggedInUserId = Auth::id();
+
+        $existingItem = Item::where('name', $validatedNewItem['item_name'])->where('user_id', $loggedInUserId)->first();
 
         if ($existingItem) {
             $result = $list->addItem($existingItem['id'], $existingItem['name']);
@@ -111,8 +94,6 @@ class ListController extends Controller
                 'errors' => [$result['error']]
             ], 404);
         } else {
-            $loggedInUserId = Auth::id();
-
             $item = Item::create([
                 'name' => $validatedNewItem['item_name'],
                 'user_id' => $loggedInUserId
@@ -134,16 +115,8 @@ class ListController extends Controller
         }
     }
 
-    public function removeItem(Request $request, $id)
+    public function removeItem(Request $request, ShoppingList $list)
     {
-        $list = ShoppingList::find($id);
-
-        if (!$list) {
-            return response([
-                'errors' => ['Could not find list with the requested id.']
-            ], 404);
-        }
-
         $list->items()->detach($request->item_id);
 
         return [
@@ -151,21 +124,9 @@ class ListController extends Controller
         ];
     }
 
-    public function addFromRecipe(Request $request, $id)
+    public function addFromRecipe(ShoppingList $list, Recipe $recipe)
     {
-        $list = ShoppingList::find($id);
-
-        if (!$list) {
-            return response([
-                'errors' => ['Could not find list with the requested id.']
-            ], 404);
-        }
-
-        $validatedRecipe = $request->validate([
-            'recipe_id' => ['required']
-        ]);
-
-        $result = $list->addItemsFromRecipe($validatedRecipe['recipe_id']);
+        $result = $list->addItemsFromRecipe($recipe->id);
 
         if (!$result['success']) {
             return response([
@@ -178,30 +139,8 @@ class ListController extends Controller
         ]; 
     }
 
-    public function addFromMenu(Request $request, $id)
+    public function addFromMenu(ShoppingList $list, Menu $menu)
     {
-        $list = ShoppingList::find($id);
-
-        if (!$list) {
-            return response([
-                'errors' => ['Could not find list with the requested id.']
-            ], 404);
-        }
-
-        $validatedMenu = $request->validate([
-            'menu_id' => ['required', 'integer']
-        ]);
-
-        $menu = Menu::find($validatedMenu['menu_id']);
-
-        if (!$menu) {
-            return response([
-                'errors' => ['Could not find menu with the requested id.']
-            ], 404);
-        }
-
-        // Now we have the list and the menu
-
         // loop through all the recipes in the menu, and add them to the list
         $menuRecipes = $menu->recipes()->get()->toArray();
 
