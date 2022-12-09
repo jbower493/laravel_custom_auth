@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Menu;
+use App\Models\Recipe;
 
 class MenuController extends Controller
 {
@@ -42,10 +43,8 @@ class MenuController extends Controller
         ];
     }
 
-    public function delete($id)
+    public function delete(Menu $menu)
     {
-        $menu = Menu::find($id);
-
         // Remove all recipes from menu before deleting
         $menu->removeAllRecipes();
 
@@ -56,16 +55,8 @@ class MenuController extends Controller
         ];
     }
 
-    public function singleMenu($id)
+    public function singleMenu(Menu $menu)
     {
-        $menu = Menu::find($id);
-
-        if (!$menu) {
-            return response([
-                'errors' => ['Could not find menu with the requested id.']
-            ], 404);
-        }
-
         $recipes = $menu->recipes()->get()->toArray();
 
         $menu->recipes = $recipes;
@@ -78,37 +69,17 @@ class MenuController extends Controller
         ];
     }
 
-    public function addRecipe(Request $request, $id)
+    public function addRecipe(Menu $menu, Recipe $recipe)
     {
-        $menu = Menu::find($id);
-
-        if (!$menu) {
-            return response([
-                'errors' => ['Could not find menu with the requested id.']
-            ], 404);
-        }
-
-        $validatedRequest = $request->validate([
-            'recipe_id' => ['required', 'integer']
-        ]);
-
-        $menu->recipes()->attach($validatedRequest['recipe_id']);
+        $menu->recipes()->attach($recipe->id);
 
         return [
             'message' => 'Recipe successfully added to menu.'
         ];
     }
 
-    public function removeRecipe(Request $request, $id)
+    public function removeRecipe(Request $request, Menu $menu)
     {
-        $menu = Menu::find($id);
-
-        if (!$menu) {
-            return response([
-                'errors' => ['Could not find menu with the requested id.']
-            ], 404);
-        }
-
         $validatedRequest = $request->validate([
             'recipe_id' => ['required', 'integer']
         ]);

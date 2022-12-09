@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Category;
+use App\Models\Item;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -42,11 +43,10 @@ class CategoryController extends Controller
         ];
     }
 
-    public function delete($id)
+    public function delete(Category $category)
     {
-        $category = Category::find($id);
-
         // set all items with that category to have a category of null, before deleting the category
+        Item::where('category_id', $category->id)->update(['category_id' => null]);
 
         $category->delete();
 

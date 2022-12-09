@@ -43,9 +43,10 @@ class RecipeController extends Controller
         ];
     }
 
-    public function delete($id)
+    public function delete(Recipe $recipe)
     {
-        $recipe = Recipe::find($id);
+        // Remove from all menus that it belongs to
+        $recipe->removeFromAllMenus();
 
         // Remove all items from recipe before deleting
         $recipe->removeAllItems();
@@ -57,16 +58,8 @@ class RecipeController extends Controller
         ];
     }
 
-    public function singleRecipe($id)
+    public function singleRecipe(Recipe $recipe)
     {
-        $recipe = Recipe::find($id);
-
-        if (!$recipe) {
-            return response([
-                'errors' => ['Could not find recipe with the requested id.']
-            ], 404);
-        }
-
         $items = $recipe->items()->get()->toArray();
 
         $recipe->items = $items;
@@ -79,23 +72,17 @@ class RecipeController extends Controller
         ];
     }
 
-    public function addItem(Request $request, $id)
+    public function addItem(Request $request, Recipe $recipe)
     {
-        $recipe = Recipe::find($id);
-
-        if (!$recipe) {
-            return response([
-                'errors' => ['Could not find recipe with the requested id.']
-            ], 404);
-        }
-
         $validatedNewItem = $request->validate([
             'item_name' => ['required']
         ]);
 
+        $loggedInUserId = Auth::id();
+
         $currentRecipeItems = $recipe->items();
 
-        $existingItem = Item::where('name', $validatedNewItem['item_name'])->first();
+        $existingItem = Item::where('name', $validatedNewItem['item_name'])->where('user_id', $loggedInUserId)->first();
 
         if ($existingItem) {
             // Check for duplicate in list
@@ -120,8 +107,6 @@ class RecipeController extends Controller
                 'message' => 'Item successfully added to recipe.'
             ];
         } else {
-            $loggedInUserId = Auth::id();
-
             $item = Item::create([
                 'name' => $validatedNewItem['item_name'],
                 'user_id' => $loggedInUserId
@@ -137,16 +122,8 @@ class RecipeController extends Controller
         }
     }
 
-    public function removeItem(Request $request, $id)
+    public function removeItem(Request $request, Recipe $recipe)
     {
-        $recipe = Recipe::find($id);
-
-        if (!$recipe) {
-            return response([
-                'errors' => ['Could not find recipe with the requested id.']
-            ], 404);
-        }
-
         $recipe->items()->detach($request->item_id);
 
         return [

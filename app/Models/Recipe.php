@@ -23,6 +23,11 @@ class Recipe extends Model
         return $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id');
     }
 
+    public function removeFromAllMenus()
+    {
+        DB::table('menu_recipe')->where('recipe_id', $this->id)->delete();
+    }
+
     public function removeAllItems()
     {
         DB::table('recipe_item')->where('recipe_id', $this->id)->delete();
