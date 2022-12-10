@@ -7,6 +7,7 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Auth\Notifications\ResetPassword;
 use App\Models\ShoppingList;
 use App\Policies\ShoppingListPolicy;
+use Illuminate\Support\Facades\App;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -29,7 +30,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         ResetPassword::createUrlUsing(function ($user, string $token) {
-            $baseUrl = config('APP_ENV') === 'production' ? 'https://shoppinglist.jbwebsites.work/' : 'http://localhost:3000/';
+            $baseUrl = App::environment() === 'production' ? 'https://shoppinglist.jbwebsites.work/' : 'http://localhost:3000/';
 
             return $baseUrl.'reset-password/'.$token.'?email='.$user->email;
         });
