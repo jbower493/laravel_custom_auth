@@ -29,7 +29,9 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         ResetPassword::createUrlUsing(function ($user, string $token) {
-            return 'http://localhost:3000/reset-password/'.$token.'?email='.$user->email;
+            $baseUrl = config('APP_ENV') === 'production' ? 'https://shoppinglist.jbwebsites.work/' : 'http://localhost:3000/';
+
+            return $baseUrl.'reset-password/'.$token.'?email='.$user->email;
         });
     }
 }
