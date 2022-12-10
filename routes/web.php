@@ -8,6 +8,9 @@ use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CategoryController;
 
+// use App\Mail\Welcome;
+// use Illuminate\Support\Facades\Mail;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -26,6 +29,8 @@ Route::get('/api/user', [AuthController::class, 'getUser']);
 Route::post('/api/login', [AuthController::class, 'login']);
 Route::post('/api/register', [AuthController::class, 'register']);
 Route::get('/api/logout', [AuthController::class, 'logout'])->middleware('auth:web');
+Route::post('/api/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
+Route::post('/api/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
 // Items
 Route::get('/api/item', [ItemController::class, 'index'])->middleware('auth:web');
@@ -74,3 +79,10 @@ Route::post('/api/menu/{menu}/remove-recipe', [MenuController::class, 'removeRec
 Route::get('/api/category', [CategoryController::class, 'index'])->middleware('auth:web');
 Route::post('/api/category', [CategoryController::class, 'store'])->middleware('auth:web');
 Route::delete('/api/category/{category}', [CategoryController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,category');
+
+// Example of how to send an email
+// Route::get('/api/email', function() {
+//     Mail::to(Auth::user())->send(new Welcome());
+
+//     return 'Email sent';
+// })->middleware('auth:web');
