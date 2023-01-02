@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class RecipeController extends Controller
 {
@@ -74,7 +75,7 @@ class RecipeController extends Controller
 
     public function addItem(Request $request, Recipe $recipe)
     {
-        $validatedNewItem = $request->validate([
+        $validatedItem = $request->validate([
             'item_name' => ['required']
         ]);
 
@@ -82,14 +83,14 @@ class RecipeController extends Controller
 
         $currentRecipeItems = $recipe->items();
 
-        $existingItem = Item::where('name', $validatedNewItem['item_name'])->where('user_id', $loggedInUserId)->first();
+        $existingItem = Item::where('name', $validatedItem['item_name'])->where('user_id', $loggedInUserId)->first();
 
         if ($existingItem) {
             // Check for duplicate in list
             $isDuplicate = false;
 
             foreach ($currentRecipeItems->get()->toArray() as &$item) {
-                if ($item['name'] === $validatedNewItem['item_name']) {
+                if ($item['name'] === $validatedItem['item_name']) {
                     $isDuplicate = true;
                     break;
                 }
@@ -107,9 +108,21 @@ class RecipeController extends Controller
                 'message' => 'Item successfully added to recipe.'
             ];
         } else {
+            $validatedNewItem = Validator::make(
+                [
+                    'name' => $validatedItem['item_name'],
+                    'category_id' => $request['category_id'] ?? null
+                ],
+                [
+                    'name' => ['required'],
+                    'category_id' => ['nullable', 'integer']
+                ]
+            )->validate();
+
             $item = Item::create([
-                'name' => $validatedNewItem['item_name'],
-                'user_id' => $loggedInUserId
+                'name' => $validatedItem['item_name'],
+                'user_id' => $loggedInUserId,
+                'category_id' => $validatedNewItem['category_id']
             ]);
     
             $item->save();

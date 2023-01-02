@@ -8,6 +8,7 @@ use App\Models\Recipe;
 use App\Models\Item;
 use App\Models\Menu;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ListController extends Controller
 {
@@ -73,13 +74,13 @@ class ListController extends Controller
 
     public function addItem(Request $request, ShoppingList $list)
     {
-        $validatedNewItem = $request->validate([
+        $validatedItem = $request->validate([
             'item_name' => ['required']
         ]);
 
         $loggedInUserId = Auth::id();
 
-        $existingItem = Item::where('name', $validatedNewItem['item_name'])->where('user_id', $loggedInUserId)->first();
+        $existingItem = Item::where('name', $validatedItem['item_name'])->where('user_id', $loggedInUserId)->first();
 
         if ($existingItem) {
             $result = $list->addItem($existingItem['id'], $existingItem['name']);
@@ -94,9 +95,21 @@ class ListController extends Controller
                 'errors' => [$result['error']]
             ], 404);
         } else {
+            $validatedNewItem = Validator::make(
+                [
+                    'name' => $validatedItem['item_name'],
+                    'category_id' => $request['category_id'] ?? null
+                ],
+                [
+                    'name' => ['required'],
+                    'category_id' => ['nullable', 'integer']
+                ]
+            )->validate();
+
             $item = Item::create([
-                'name' => $validatedNewItem['item_name'],
-                'user_id' => $loggedInUserId
+                'name' => $validatedNewItem['name'],
+                'user_id' => $loggedInUserId,
+                'category_id' => $validatedNewItem['category_id']
             ]);
     
             $item->save();
