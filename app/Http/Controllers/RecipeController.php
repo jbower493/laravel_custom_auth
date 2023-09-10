@@ -14,7 +14,7 @@ class RecipeController extends Controller
     {
         $loggedInUserId = Auth::id();
 
-        $recipes = Recipe::where('user_id', $loggedInUserId)->orderBy('created_at', 'desc')->get()->toArray();
+        $recipes = Recipe::where('user_id', $loggedInUserId)->orderBy('name')->get()->toArray();
 
         return [
             'message' => 'Successfully retrieved recipes.',
@@ -124,7 +124,7 @@ class RecipeController extends Controller
                 'user_id' => $loggedInUserId,
                 'category_id' => $validatedNewItem['category_id']
             ]);
-    
+
             $item->save();
 
             $currentRecipeItems->attach($item['id']);

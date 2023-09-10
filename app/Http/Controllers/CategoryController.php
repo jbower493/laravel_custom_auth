@@ -13,7 +13,7 @@ class CategoryController extends Controller
     {
         $loggedInUserId = Auth::id();
 
-        $categories = Category::where('user_id', $loggedInUserId)->orderBy('created_at', 'desc')->get()->toArray();
+        $categories = Category::where('user_id', $loggedInUserId)->orderBy('name')->get()->toArray();
 
         return [
             'message' => 'Successfully retreived categories.',
