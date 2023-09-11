@@ -44,6 +44,27 @@ class RecipeController extends Controller
         ];
     }
 
+    public function update(Request $request, Recipe $recipe)
+    {
+        // Validate the recipe data
+        $validatedRecipeData = $request->validate([
+            'name' => ['required', 'string'],
+            'instructions' => ['string']
+        ]);
+
+        // Update the model
+        $recipe->name = $validatedRecipeData['name'];
+        $recipe->instructions = $validatedRecipeData['instructions'];
+
+        // Save the model
+        $recipe->save();
+
+        // Send response
+        return [
+            'message' => 'Recipe successfully updated.'
+        ];
+    }
+
     public function delete(Recipe $recipe)
     {
         // Remove from all menus that it belongs to
