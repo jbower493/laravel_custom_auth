@@ -7,6 +7,7 @@ use App\Models\Recipe;
 use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 
 class RecipeController extends Controller
 {
@@ -49,7 +50,7 @@ class RecipeController extends Controller
         // Validate the recipe data
         $validatedRecipeData = $request->validate([
             'name' => ['required', 'string'],
-            'instructions' => ['string']
+            'instructions' => ['string', 'nullable']
         ]);
 
         // Update the model
@@ -162,6 +163,45 @@ class RecipeController extends Controller
 
         return [
             'message' => 'Item successfully removed from recipe.'
+        ];
+    }
+
+    public function fromUrl(Request $request, Recipe $recipe)
+    {
+        // Docs for simple html dom file
+        // https://simplehtmldom.sourceforge.io/docs/1.9/api/file_get_html/#
+
+        $url = $request['url'];
+
+        $response = Http::get($url);
+        $body = $response->body();
+        $noNewLines = str_replace("\n", '', $body);
+
+        // Find the "Method" part of the page
+        $methodRegex = '/Method<\/h2>.*<\/ol>/';
+        preg_match($methodRegex, $noNewLines, $methodMatches);
+        $methodChunk = $methodMatches[0];
+
+        // Find the "steps" (li's) within that section
+        $document = str_get_html($methodChunk);
+
+        $listElements = $document->find('li');
+
+        $steps = [];
+
+        foreach ($listElements as $index => $listElement) {
+            $child = $listElement->first_child();
+            $text = $child->innertext();
+            $steps[$index] = strval($index + 1) . ') ' . $text;
+        }
+
+        $newInstructions = implode("\n", $steps);
+
+        $recipe->instructions = $newInstructions;
+        $recipe->save();
+
+        return [
+            'message' => 'Recipe successfully imported from url.'
         ];
     }
 }
