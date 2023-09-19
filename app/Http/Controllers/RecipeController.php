@@ -8,6 +8,7 @@ use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
+use App\RecipeUtils\FromUrl;
 
 class RecipeController extends Controller
 {
@@ -164,6 +165,15 @@ class RecipeController extends Controller
         return [
             'message' => 'Item successfully removed from recipe.'
         ];
+    }
+
+    public function fromUrlTest(Request $request, Recipe $recipe)
+    {
+        $fromUrl = new FromUrl();
+
+        // dd($fromUrl->something());
+
+        return 'Success';
     }
 
     public function fromUrl(Request $request, Recipe $recipe)
