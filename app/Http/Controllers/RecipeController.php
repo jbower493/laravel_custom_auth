@@ -170,9 +170,15 @@ class RecipeController extends Controller
     {
         $fromUrl = new FromUrl($request['url']);
 
-        $newInstructions = $fromUrl->getInstructions();
+        $attemptInstructions = $fromUrl->getInstructions();
 
-        $recipe->instructions = $newInstructions;
+        if (!$attemptInstructions['success']) {
+            return response([
+                'errors' => ['Could not get instructions from the provided url.']
+            ], 400);
+        }
+
+        $recipe->instructions = $attemptInstructions['instructions'];
         $recipe->save();
 
         return [
