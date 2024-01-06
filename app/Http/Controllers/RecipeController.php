@@ -29,12 +29,20 @@ class RecipeController extends Controller
     {
         $loggedInUserId = Auth::id();
 
-        $validatedRecipe = $request->validate([
-            'name' => ['required']
-        ]);
+        $validatedRecipe = Validator::make(
+            [
+                'name' => $request['name'],
+                'recipe_category_id' => $request['recipe_category_id'] ?? null
+            ],
+            [
+                'name' => ['required'],
+                'recipe_category_id' => ['nullable', 'integer']
+            ]
+        )->validate();
 
         $recipe = Recipe::create([
             'name' => $validatedRecipe['name'],
+            'recipe_category_id' => $validatedRecipe['recipe_category_id'],
             'user_id' => $loggedInUserId
         ]);
 

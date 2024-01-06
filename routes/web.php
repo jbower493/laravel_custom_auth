@@ -7,6 +7,7 @@ use App\Http\Controllers\ListController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\RecipeCategoryController;
 
 // use App\Mail\Welcome;
 // use Illuminate\Support\Facades\Mail;
@@ -82,9 +83,7 @@ Route::get('/api/category', [CategoryController::class, 'index'])->middleware('a
 Route::post('/api/category', [CategoryController::class, 'store'])->middleware('auth:web');
 Route::delete('/api/category/{category}', [CategoryController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,category');
 
-// Example of how to send an email
-// Route::get('/api/email', function() {
-//     Mail::to(Auth::user())->send(new Welcome());
-
-//     return 'Email sent';
-// })->middleware('auth:web');
+// Recipe categories
+Route::get('/api/recipe-category', [RecipeCategoryController::class, 'index'])->middleware('auth:web');
+Route::post('/api/recipe-category', [RecipeCategoryController::class, 'store'])->middleware('auth:web');
+Route::delete('/api/recipe-category/{recipeCategory}', [RecipeCategoryController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,recipeCategory');
