@@ -7,6 +7,7 @@ use App\Models\Recipe;
 use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\RecipeUtils\FromUrl;
 
 class RecipeController extends Controller
 {
@@ -41,6 +42,27 @@ class RecipeController extends Controller
 
         return [
             'message' => 'Recipe successfully created.'
+        ];
+    }
+
+    public function update(Request $request, Recipe $recipe)
+    {
+        // Validate the recipe data
+        $validatedRecipeData = $request->validate([
+            'name' => ['required', 'string'],
+            'instructions' => ['string', 'nullable']
+        ]);
+
+        // Update the model
+        $recipe->name = $validatedRecipeData['name'];
+        $recipe->instructions = $validatedRecipeData['instructions'];
+
+        // Save the model
+        $recipe->save();
+
+        // Send response
+        return [
+            'message' => 'Recipe successfully updated.'
         ];
     }
 
@@ -141,6 +163,26 @@ class RecipeController extends Controller
 
         return [
             'message' => 'Item successfully removed from recipe.'
+        ];
+    }
+
+    public function fromUrl(Request $request, Recipe $recipe)
+    {
+        $fromUrl = new FromUrl($request['url']);
+
+        $attemptInstructions = $fromUrl->getInstructions();
+
+        if (!$attemptInstructions['success']) {
+            return response([
+                'errors' => ['Could not get instructions from the provided url.']
+            ], 400);
+        }
+
+        $recipe->instructions = $attemptInstructions['instructions'];
+        $recipe->save();
+
+        return [
+            'message' => 'Recipe successfully imported from url.'
         ];
     }
 }
