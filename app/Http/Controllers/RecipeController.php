@@ -56,13 +56,22 @@ class RecipeController extends Controller
     public function update(Request $request, Recipe $recipe)
     {
         // Validate the recipe data
-        $validatedRecipeData = $request->validate([
-            'name' => ['required', 'string'],
-            'instructions' => ['string', 'nullable']
-        ]);
+        $validatedRecipeData = Validator::make(
+            [
+                'name' => $request['name'],
+                'instructions' => $request['instructions'],
+                'recipe_category_id' => $request['recipe_category_id'] ?? null
+            ],
+            [
+                'name' => ['required', 'string'],
+                'instructions' => ['string', 'nullable'],
+                'recipe_category_id' => ['nullable', 'integer']
+            ]
+        )->validate();
 
         // Update the model
         $recipe->name = $validatedRecipeData['name'];
+        $recipe->recipe_category_id = $validatedRecipeData['recipe_category_id'];
         $recipe->instructions = $validatedRecipeData['instructions'];
 
         // Save the model
