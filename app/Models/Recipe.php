@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Item;
+use App\Models\RecipeCategory;
 use Illuminate\Support\Facades\DB;
 
 class Recipe extends Model
@@ -16,8 +17,21 @@ class Recipe extends Model
     protected $fillable = [
         'name',
         'user_id',
-        'instructions'
+        'instructions',
+        'recipe_category_id'
     ];
+
+    // Eager load the recipe's recipe category by default
+    protected $with = ['recipeCategory'];
+
+    // Omits the "recipe_category_id" from any collection of recipes that is retrieved
+    protected $hidden = ['recipe_category_id'];
+
+    // This method has to be named the same as the "protected $with" name above, or we will get "call to undefined relationship"
+    public function recipeCategory()
+    {
+        return $this->belongsTo(RecipeCategory::class);
+    }
 
     public function items()
     {
@@ -32,5 +46,24 @@ class Recipe extends Model
     public function removeAllItems()
     {
         DB::table('recipe_item')->where('recipe_id', $this->id)->delete();
+    }
+
+    public function assignToRecipeCategory($recipeCategoryId)
+    {
+        $recipeCategory = RecipeCategory::find($recipeCategoryId);
+
+        if (!$recipeCategory) {
+            return [
+                'success' => false,
+                'error' => 'Recipe category with that id doesn\'t exist.'
+            ];
+        }
+
+        $this->recipe_category_id = $recipeCategory;
+        $this->save();
+
+        return [
+            'success' => true
+        ];
     }
 }
