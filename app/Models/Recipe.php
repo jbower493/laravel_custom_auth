@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Item;
 use App\Models\RecipeCategory;
+use App\Models\RecipeItemPivot;
 use Illuminate\Support\Facades\DB;
 
 class Recipe extends Model
@@ -25,7 +26,7 @@ class Recipe extends Model
     protected $with = ['recipeCategory'];
 
     // Omits the "recipe_category_id" from any collection of recipes that is retrieved
-    protected $hidden = ['recipe_category_id'];
+    protected $hidden = ['recipe_category_id', 'created_at', 'updated_at', 'user_id', 'recipe_items_pivot'];
 
     // This method has to be named the same as the "protected $with" name above, or we will get "call to undefined relationship"
     public function recipeCategory()
@@ -35,21 +36,17 @@ class Recipe extends Model
 
     public function items()
     {
-        // $items = $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id')->withPivot('quantity', 'quantity_unit_id');
-
         $items = $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id')->withPivot('quantity', 'quantity_unit_id');
 
-        // foreach ($items as $item) {
-        //     $quantityUnit = $item->pivot->quantityUnit;
-        //     dump($quantityUnit);
-        // }
-
-        // dd($items->get()->toArray());
-
-        // ORIGINAL
-        // $items = $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id');
-
         return $items;
+    }
+
+    /**
+     * Here is experiment
+     */
+    public function itemsTemp()
+    {
+        return $this->hasMany(RecipeItemPivot::class);
     }
 
     public function removeFromAllMenus()

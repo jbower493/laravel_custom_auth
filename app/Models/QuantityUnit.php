@@ -13,4 +13,6 @@ class QuantityUnit extends Model
         'name',
         'symbol'
     ];
+
+    protected $hidden = ['created_at', 'updated_at', 'user_id'];
 }
