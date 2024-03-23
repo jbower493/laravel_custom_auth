@@ -35,7 +35,21 @@ class Recipe extends Model
 
     public function items()
     {
-        return $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id');
+        // $items = $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id')->withPivot('quantity', 'quantity_unit_id');
+
+        $items = $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id')->withPivot('quantity', 'quantity_unit_id');
+
+        // foreach ($items as $item) {
+        //     $quantityUnit = $item->pivot->quantityUnit;
+        //     dump($quantityUnit);
+        // }
+
+        // dd($items->get()->toArray());
+
+        // ORIGINAL
+        // $items = $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id');
+
+        return $items;
     }
 
     public function removeFromAllMenus()

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\Item;
+use App\Models\QuantityUnit;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\RecipeUtils\FromUrl;
@@ -101,6 +102,13 @@ class RecipeController extends Controller
     public function singleRecipe(Recipe $recipe)
     {
         $items = $recipe->items()->get()->toArray();
+
+        foreach ($recipe->items as $item) {
+            $quantityUnitId = $item['pivot']['quantity_unit_id'];
+            $quantityUnit = QuantityUnit::find($quantityUnitId);
+
+            $item['pivot']['quantity_unit'] = $quantityUnit;
+        }
 
         $recipe->items = $items;
 
