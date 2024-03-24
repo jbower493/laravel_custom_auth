@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Item;
 use App\Models\RecipeCategory;
-use App\Models\RecipeItemPivot;
+use App\Models\Pivots\RecipeItemPivot;
 use Illuminate\Support\Facades\DB;
 
 class Recipe extends Model
