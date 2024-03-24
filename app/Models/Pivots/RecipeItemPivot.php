@@ -2,16 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use App\Models\QuantityUnit;
 use App\Models\Item;
 
+
 // Eager loading extra data from pivot tables
 // https://laracasts.com/discuss/channels/eloquent/eager-loading-pivot-tables
-class RecipeItemPivot extends Model
+class RecipeItemPivot extends Pivot
 {
     protected $table = 'recipe_item';
 
@@ -27,6 +25,6 @@ class RecipeItemPivot extends Model
 
     public function quantityUnit()
     {
-        return $this->belongsTo(QuantityUnit::class);
+        return $this->belongsTo(QuantityUnit::class, 'quantity_unit_id');
     }
 }

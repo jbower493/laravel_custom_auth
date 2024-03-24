@@ -101,31 +101,9 @@ class RecipeController extends Controller
 
     public function singleRecipe(Recipe $recipe)
     {
-        // $items = $recipe->items()->get()->toArray();
-
-        // $oneRecipe = Recipe::find(1)->items[0]->pivot;
-
-        // dump($oneRecipe);
-
-        // dd($recipe->recipeItemsPivot);
-
-        // $recipe->items = $recipe->itemsTemp()->get()->toArray();
-        // dd($recipe);
-
-        // TODO: just by running this loop, it adds, "itemsTemp" key to the recipe data. That's what I want, but IDK why just running this loop automatically does that
-        foreach ($recipe->itemsTemp as $recipeItemPivot) {
-
-            // dump($recipeItemPivot);
+        foreach ($recipe->items as $recipeItemPivot) {
+            $recipeItemPivot->item_quantity->quantityUnit;
         }
-
-        // foreach ($recipe->items as $item) {
-        //     $quantityUnitId = $item['pivot']['quantity_unit_id'];
-        //     $quantityUnit = QuantityUnit::find($quantityUnitId);
-
-        //     $item['pivot']['quantity_unit'] = $quantityUnit;
-        // }
-
-        // $recipe->items = $items;
 
         return [
             'message' => 'Recipe successfully fetched.',
