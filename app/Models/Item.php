@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Models\Category;
+use App\Models\QuantityUnit;
+use App\Models\Recipe;
 
 class Item extends Model
 {
@@ -14,18 +16,24 @@ class Item extends Model
     protected $fillable = [
         'name',
         'category_id',
-        'user_id'
+        'user_id',
+        'default_quantity_unit_id'
     ];
 
     // Eager load the item's category by default
-    protected $with = ['category'];
+    protected $with = ['category', 'defaultQuantityUnit'];
 
     // Omits the "category_id" from any collection of Items that is retrieved
-    protected $hidden = ['category_id'];
+    protected $hidden = ['category_id', 'default_quantity_unit_id', 'created_at', 'updated_at', 'user_id'];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function defaultQuantityUnit()
+    {
+        return $this->belongsTo(QuantityUnit::class);
     }
 
     public function removeFromAllLists()
