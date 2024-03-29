@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\RecipeUtils\FromUrl;
 
+use App\Utils\Converter;
+
 class RecipeController extends Controller
 {
     public function index()
@@ -101,16 +103,27 @@ class RecipeController extends Controller
 
     public function singleRecipe(Recipe $recipe)
     {
-        foreach ($recipe->items as $recipeItemPivot) {
-            $recipeItemPivot->item_quantity->quantityUnit;
-        }
+        // foreach ($recipe->items as $recipeItemPivot) {
+        //     $recipeItemPivot->item_quantity->quantityUnit;
+        // }
+
+        $converter = new Converter();
+
+        $amount = $converter->cupsToMililitres(8);
 
         return [
             'message' => 'Recipe successfully fetched.',
             'data' => [
-                'recipe' => $recipe
+                'recipe' => $amount
             ]
         ];
+
+        // return [
+        //     'message' => 'Recipe successfully fetched.',
+        //     'data' => [
+        //         'recipe' => $recipe
+        //     ]
+        // ];
     }
 
     public function addItem(Request $request, Recipe $recipe)

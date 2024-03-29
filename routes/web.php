@@ -36,6 +36,7 @@ Route::post('/api/reset-password', [AuthController::class, 'resetPassword'])->na
 // Items
 Route::get('/api/item', [ItemController::class, 'index'])->middleware('auth:web');
 Route::post('/api/item', [ItemController::class, 'store'])->middleware('auth:web');
+Route::put('/api/item/{item}', [ItemController::class, 'update'])->middleware('auth:web');
 Route::delete('/api/item/{item}', [ItemController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,item');
 Route::put('/api/item/category/{categoryId}/bulk', [ItemController::class, 'bulkAssignCategory'])->middleware('auth:web');
 
