@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\Item;
+use App\Models\Pivots\RecipeItemPivot;
 use App\Models\QuantityUnit;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -103,47 +104,52 @@ class RecipeController extends Controller
 
     public function singleRecipe(Recipe $recipe)
     {
-        // foreach ($recipe->items as $recipeItemPivot) {
-        //     $recipeItemPivot->item_quantity->quantityUnit;
-        // }
-
-        $converter = new Converter();
-
-        $amount = $converter->cupsToMililitres(8);
+        foreach ($recipe->items as $recipeItemPivot) {
+            $recipeItemPivot->item_quantity->quantityUnit;
+        }
 
         return [
             'message' => 'Recipe successfully fetched.',
             'data' => [
-                'recipe' => $amount
+                'recipe' => $recipe
             ]
         ];
-
-        // return [
-        //     'message' => 'Recipe successfully fetched.',
-        //     'data' => [
-        //         'recipe' => $recipe
-        //     ]
-        // ];
     }
 
     public function addItem(Request $request, Recipe $recipe)
     {
-        $validatedItem = $request->validate([
-            'item_name' => ['required']
-        ]);
+        $validatedNewItem = Validator::make(
+            [
+                'name' => $request['item_name'],
+                'category_id' => $request['category_id'] ?? null,
+                'quantity' => $request['quantity'],
+                'quantity_unit_id' => $request['quantity_unit_id'] ?? null
+            ],
+            [
+                'name' => ['required'],
+                'category_id' => ['nullable', 'integer'],
+                'quantity' => ['required'],
+                'quantity_unit_id' => ['nullable', 'integer']
+            ]
+        )->validate();
+
+        $recipeItemPivotAttributes = [
+            'quantity' => $validatedNewItem['quantity'],
+            'quantity_unit_id' => $validatedNewItem['quantity_unit_id']
+        ];
 
         $loggedInUserId = Auth::id();
 
         $currentRecipeItems = $recipe->items();
 
-        $existingItem = Item::where('name', $validatedItem['item_name'])->where('user_id', $loggedInUserId)->first();
+        $existingItem = Item::where('name', $validatedNewItem['name'])->where('user_id', $loggedInUserId)->first();
 
         if ($existingItem) {
             // Check for duplicate in list
             $isDuplicate = false;
 
             foreach ($currentRecipeItems->get()->toArray() as &$item) {
-                if ($item['name'] === $validatedItem['item_name']) {
+                if ($item['name'] === $validatedNewItem['name']) {
                     $isDuplicate = true;
                     break;
                 }
@@ -155,37 +161,56 @@ class RecipeController extends Controller
                 ], 400);
             }
 
-            $currentRecipeItems->attach($existingItem['id']);
+            $currentRecipeItems->attach($existingItem['id'], $recipeItemPivotAttributes);
 
             return [
                 'message' => 'Item successfully added to recipe.'
             ];
-        } else {
-            $validatedNewItem = Validator::make(
-                [
-                    'name' => $validatedItem['item_name'],
-                    'category_id' => $request['category_id'] ?? null
-                ],
-                [
-                    'name' => ['required'],
-                    'category_id' => ['nullable', 'integer']
-                ]
-            )->validate();
-
-            $item = Item::create([
-                'name' => $validatedItem['item_name'],
-                'user_id' => $loggedInUserId,
-                'category_id' => $validatedNewItem['category_id']
-            ]);
-
-            $item->save();
-
-            $currentRecipeItems->attach($item['id']);
-
-            return [
-                'message' => 'Item successfully created and added to recipe.'
-            ];
         }
+
+        // Item doesn't already exist
+        $item = Item::create([
+            'name' => $validatedNewItem['name'],
+            'user_id' => $loggedInUserId,
+            'category_id' => $validatedNewItem['category_id'],
+            'default_quantity_unit_id' => $validatedNewItem['quantity_unit_id']
+        ]);
+
+        $item->save();
+
+        $currentRecipeItems->attach($item['id'], $recipeItemPivotAttributes);
+
+        return [
+            'message' => 'Item successfully created and added to recipe.'
+        ];
+    }
+
+    public function updateItemQuantity(Request $request, Recipe $recipe)
+    {
+        $validatedRequest = Validator::make(
+            [
+                'item_id' => $request['item_id'],
+                'quantity' => $request['quantity'],
+                'quantity_unit_id' => $request['quantity_unit_id'] ?? null
+            ],
+            [
+                'item_id' => ['required'],
+                'quantity' => ['required'],
+                'quantity_unit_id' => ['nullable', 'integer']
+            ]
+        )->validate();
+
+        $newQuantityUnit = QuantityUnit::findOrFail($validatedRequest['quantity_unit_id']);
+        $newPivotvalues = [
+            'quantity' => $validatedRequest['quantity'],
+            "quantity_unit_id" => $newQuantityUnit->id
+        ];
+
+        $recipe->items()->updateExistingPivot($validatedRequest['item_id'], $newPivotvalues);
+
+        return [
+            'message' => 'Successfully updated recipe item quantity.'
+        ];
     }
 
     public function removeItem(Request $request, Recipe $recipe)

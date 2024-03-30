@@ -63,6 +63,7 @@ Route::delete('/api/recipe/{recipe}', [RecipeController::class, 'delete'])->midd
 Route::get('/api/recipe/{recipe}', [RecipeController::class, 'singleRecipe'])->middleware('auth:web')->middleware('can:view,recipe');
 Route::put('/api/recipe/{recipe}', [RecipeController::class, 'update'])->middleware('auth:web')->middleware('can:update,recipe');
 Route::post('/api/recipe/{recipe}/add-item', [RecipeController::class, 'addItem'])->middleware('auth:web')->middleware('can:update,recipe');
+Route::put('/api/recipe/{recipe}/update-item-quantity', [RecipeController::class, 'updateItemQuantity'])->middleware('auth:web')->middleware('can:update,recipe');
 Route::post('/api/recipe/{recipe}/remove-item', [RecipeController::class, 'removeItem'])->middleware('auth:web')->middleware('can:update,recipe');
 Route::put('/api/recipe/{recipe}/from-url', [RecipeController::class, 'fromUrl'])->middleware('auth:web')->middleware('can:update,recipe');
 
