@@ -184,7 +184,7 @@ class ListController extends Controller
         }
 
         return [
-            'message' => $result['some_already_on_list'] ? "Items from recipe successfully added to list (some we're already on the list)." : 'Items from recipe successfully added to list.'
+            'message' => 'Items from recipe successfully added to list.'
         ];
     }
 
@@ -193,14 +193,8 @@ class ListController extends Controller
         // loop through all the recipes in the menu, and add them to the list
         $menuRecipes = $menu->recipes()->get()->toArray();
 
-        $someAlreadyOnList = false;
-
         foreach ($menuRecipes as $recipe) {
             $result = $list->addItemsFromRecipe($recipe['id']);
-
-            if ($result['some_already_on_list']) {
-                $someAlreadyOnList = true;
-            }
 
             if (!$result['success']) {
                 return response([
@@ -210,7 +204,7 @@ class ListController extends Controller
         }
 
         return [
-            'message' => $someAlreadyOnList ? "Items from menu successfully added to list (some we're already on the list)." : 'Items from menu successfully added to list.'
+            'message' => 'Items from menu successfully added to list.'
         ];
     }
 }
