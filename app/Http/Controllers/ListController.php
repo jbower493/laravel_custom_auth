@@ -60,9 +60,9 @@ class ListController extends Controller
 
     public function singleList(ShoppingList $list)
     {
-        $items = $list->items()->get()->toArray();
-
-        $list->items = $items;
+        foreach ($list->items as $listItemPivot) {
+            $listItemPivot->item_quantity->quantityUnit;
+        }
 
         return [
             'message' => 'List successfully fetched.',
@@ -111,7 +111,7 @@ class ListController extends Controller
                 'user_id' => $loggedInUserId,
                 'category_id' => $validatedNewItem['category_id']
             ]);
-    
+
             $item->save();
 
             $result = $list->addItem($item['id'], $item['name']);
@@ -149,7 +149,7 @@ class ListController extends Controller
 
         return [
             'message' => $result['some_already_on_list'] ? "Items from recipe successfully added to list (some we're already on the list)." : 'Items from recipe successfully added to list.'
-        ]; 
+        ];
     }
 
     public function addFromMenu(ShoppingList $list, Menu $menu)
@@ -175,6 +175,6 @@ class ListController extends Controller
 
         return [
             'message' => $someAlreadyOnList ? "Items from menu successfully added to list (some we're already on the list)." : 'Items from menu successfully added to list.'
-        ]; 
+        ];
     }
 }
