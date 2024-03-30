@@ -35,7 +35,7 @@ class ShoppingList extends Model
     /**
      * Take an existing item and safely add it to a list, first checking that it doesn't already exist in the list
      */
-    public function addItem($itemId, $itemName)
+    public function addItem($itemId, $itemName, $listItemPivotAttributes = [])
     {
         $currentListItems = $this->items();
 
@@ -56,7 +56,7 @@ class ShoppingList extends Model
             ];
         }
 
-        $currentListItems->attach($itemId);
+        $currentListItems->attach($itemId, $listItemPivotAttributes);
 
         return [
             'success' => true

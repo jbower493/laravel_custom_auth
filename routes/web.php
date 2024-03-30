@@ -46,6 +46,7 @@ Route::post('/api/list', [ListController::class, 'store'])->middleware('auth:web
 Route::delete('/api/list/{list}', [ListController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,list');
 Route::get('/api/list/{list}', [ListController::class, 'singleList'])->middleware('auth:web')->middleware('can:view,list');
 Route::post('/api/list/{list}/add-item', [ListController::class, 'addItem'])->middleware('auth:web')->middleware('can:update,list');
+Route::put('/api/list/{list}/update-item-quantity', [ListController::class, 'updateItemQuantity'])->middleware('auth:web')->middleware('can:update,list');
 Route::post('/api/list/{list}/remove-item', [ListController::class, 'removeItem'])->middleware('auth:web')->middleware('can:update,list');
 Route::post('/api/list/{list}/add-from-recipe/{recipe}', [ListController::class, 'addFromRecipe'])
     ->middleware('auth:web')
