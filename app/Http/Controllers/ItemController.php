@@ -31,24 +31,53 @@ class ItemController extends Controller
         $validatedItem = Validator::make(
             [
                 'name' => $request['name'],
-                'category_id' => $request['category_id'] ?? null
+                'category_id' => $request['category_id'] ?? null,
+                'default_quantity_unit_id' => $request['default_quantity_unit_id'] ?? null
             ],
             [
                 'name' => ['required'],
-                'category_id' => ['nullable', 'integer']
+                'category_id' => ['nullable', 'integer'],
+                'default_quantity_unit_id' => ['nullable', 'integer']
             ]
         )->validate();
 
         $item = Item::create([
             'name' => $validatedItem['name'],
             'category_id' => $validatedItem['category_id'],
-            'user_id' => $loggedInUserId
+            'user_id' => $loggedInUserId,
+            'default_quantity_unit_id' => $validatedItem['default_quantity_unit_id']
         ]);
 
         $item->save();
 
         return [
             'message' => 'Item successfully created.'
+        ];
+    }
+
+    public function update(Request $request, Item $item)
+    {
+        $validatedNewItem = Validator::make(
+            [
+                'name' => $request['name'],
+                'category_id' => $request['category_id'] ?? null,
+                'default_quantity_unit_id' => $request['default_quantity_unit_id'] ?? null
+            ],
+            [
+                'name' => ['required'],
+                'category_id' => ['nullable', 'integer'],
+                'default_quantity_unit_id' => ['nullable', 'integer']
+            ]
+        )->validate();
+
+        $item->name = $validatedNewItem['name'];
+        $item->category_id = $validatedNewItem['category_id'];
+        $item->default_quantity_unit_id = $validatedNewItem['default_quantity_unit_id'];
+
+        $item->save();
+
+        return [
+            'message' => 'Item successfully updated.'
         ];
     }
 

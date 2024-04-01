@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Item;
 use App\Models\RecipeCategory;
+use App\Models\Pivots\RecipeItemPivot;
 use Illuminate\Support\Facades\DB;
 
 class Recipe extends Model
@@ -25,7 +26,7 @@ class Recipe extends Model
     protected $with = ['recipeCategory'];
 
     // Omits the "recipe_category_id" from any collection of recipes that is retrieved
-    protected $hidden = ['recipe_category_id'];
+    protected $hidden = ['recipe_category_id', 'created_at', 'updated_at', 'user_id'];
 
     // This method has to be named the same as the "protected $with" name above, or we will get "call to undefined relationship"
     public function recipeCategory()
@@ -35,7 +36,9 @@ class Recipe extends Model
 
     public function items()
     {
-        return $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id');
+        // Use "Pivot" class to load foreign key relationships within the pivot table
+        // https://www.youtube.com/watch?v=V5xINbA-z9o&t=29s
+        return $this->belongsToMany(Item::class, 'recipe_item', 'recipe_id', 'item_id')->withPivot('quantity_unit_id', 'quantity')->using(RecipeItemPivot::class)->as('item_quantity');
     }
 
     public function removeFromAllMenus()
