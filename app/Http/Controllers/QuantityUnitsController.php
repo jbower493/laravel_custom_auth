@@ -16,7 +16,7 @@ class QuantityUnitsController extends Controller
         return [
             'message' => 'Successfully retreived quantity units.',
             'data' => [
-                'items' => $quantityUnits
+                'quantity_units' => $quantityUnits
             ]
         ];
     }
