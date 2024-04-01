@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('list_item', function (Blueprint $table) {
-            $table->integer('quantity')->nullable();
+            $table->integer('quantity')->nullable()->default(1);;
             $table->foreignId('quantity_unit_id')->nullable()->constrained('quantity_units');
         });
     }
