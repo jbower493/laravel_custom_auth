@@ -103,7 +103,7 @@ class ShoppingList extends Model
                 $convertedRecipeQuantityValue = $converter->convert($recipeQuantityValue, $recipeQuantityUnitName, $originalListQuantityUnitName);
 
                 if ($convertedRecipeQuantityValue === 0) {
-                    // TODO: handle if it failed to convert, eg. incompatible units
+                    // TODO: handle if it failed to convert, eg. incompatible units. Ideally we would abort the whole thing
                 }
 
                 // At the moment just always use the existing list quantity unit

@@ -7,6 +7,7 @@ use App\Http\Controllers\ListController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\QuantityUnitsController;
 use App\Http\Controllers\RecipeCategoryController;
 
 // use App\Mail\Welcome;
@@ -90,3 +91,6 @@ Route::delete('/api/category/{category}', [CategoryController::class, 'delete'])
 Route::get('/api/recipe-category', [RecipeCategoryController::class, 'index'])->middleware('auth:web');
 Route::post('/api/recipe-category', [RecipeCategoryController::class, 'store'])->middleware('auth:web');
 Route::delete('/api/recipe-category/{recipeCategory}', [RecipeCategoryController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,recipeCategory');
+
+// Quantity units
+Route::get('/api/quantity-units', [QuantityUnitsController::class, 'index'])->middleware('auth:web');
