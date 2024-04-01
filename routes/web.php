@@ -93,4 +93,4 @@ Route::post('/api/recipe-category', [RecipeCategoryController::class, 'store'])-
 Route::delete('/api/recipe-category/{recipeCategory}', [RecipeCategoryController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,recipeCategory');
 
 // Quantity units
-Route::get('/api/quantity-units', [QuantityUnitsController::class, 'index'])->middleware('auth:web');
+Route::get('/api/quantity-unit', [QuantityUnitsController::class, 'index'])->middleware('auth:web');
