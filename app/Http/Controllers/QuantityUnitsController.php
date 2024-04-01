@@ -8,7 +8,7 @@ class QuantityUnitsController extends Controller
 {
     public function index()
     {
-        $quantityUnits = QuantityUnit::all()->orderBy('name')->get()->toArray();
+        $quantityUnits = QuantityUnit::orderBy('name')->get()->toArray();
 
         return [
             'message' => 'Successfully retreived quantity units.',
