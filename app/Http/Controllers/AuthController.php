@@ -39,15 +39,15 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
- 
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
- 
+
             return [
                 'message' => 'Login successful.'
             ];
         }
- 
+
         return response([
             'errors' => ['Incorrect credentials.']
         ], 401);
@@ -87,16 +87,22 @@ class AuthController extends Controller
     {
 
         $request->validate(['email' => 'required|email']);
-     
-        $status = Password::sendResetLink(
+
+        Password::sendResetLink(
             $request->only('email')
         );
-     
-        return $status === Password::RESET_LINK_SENT
-            ? ['message' => 'Password reset email has been sent. Click the link in the email to reset your password.']
-            : response([
-                'errors' => ['Something went wrong.']
-            ], 500);
+
+        // $status = Password::sendResetLink(
+        //     $request->only('email')
+        // );
+
+        // return $status === Password::RESET_LINK_SENT
+        //     ? ['message' => 'Password reset email has been sent. Click the link in the email to reset your password.']
+        //     : response([
+        //         'errors' => ['Something went wrong.']
+        //     ], 500);
+
+        return ['message' => 'If an account exists for this email address, we\'ve sent a password reset email. Click the link in the email to reset your password.'];
     }
 
     public function resetPassword(Request $request)
@@ -106,20 +112,20 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|min:8|confirmed',
         ]);
-     
+
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
                     'password' => Hash::make($password)
                 ])->setRememberToken(Str::random(60));
-     
+
                 $user->save();
-     
+
                 event(new PasswordReset($user));
             }
         );
-    
+
         return $status === Password::PASSWORD_RESET
             ? ['message' => 'Password successfully reset.']
             : response([
