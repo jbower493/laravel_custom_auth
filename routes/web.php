@@ -73,6 +73,7 @@ Route::put('/api/recipe/{recipe}/from-url', [RecipeController::class, 'fromUrl']
 // Menu
 Route::get('/api/menu', [MenuController::class, 'index'])->middleware('auth:web');
 Route::post('/api/menu', [MenuController::class, 'store'])->middleware('auth:web');
+Route::put('/api/menu/{menu}', [MenuController::class, 'update'])->middleware('auth:web')->middleware('can:update,menu');
 Route::delete('/api/menu/{menu}', [MenuController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,menu');
 Route::get('/api/menu/{menu}', [MenuController::class, 'singleMenu'])->middleware('auth:web')->middleware('can:view,menu');
 Route::post('/api/menu/{menu}/add-recipe/{recipe}', [MenuController::class, 'addRecipe'])

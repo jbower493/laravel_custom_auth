@@ -43,6 +43,21 @@ class MenuController extends Controller
         ];
     }
 
+    public function update(Request $request, Menu $menu)
+    {
+        $validatedRequest = $request->validate([
+            'name' => ['required']
+        ]);
+
+        $menu->name = $validatedRequest['name'];
+
+        $menu->save();
+
+        return [
+            'message' => 'Menu successfully updated'
+        ];
+    }
+
     public function delete(Menu $menu)
     {
         // Remove all recipes from menu before deleting
