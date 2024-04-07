@@ -72,7 +72,10 @@ class ItemController extends Controller
 
         $item->name = $validatedNewItem['name'];
         $item->category_id = $validatedNewItem['category_id'];
-        $item->default_quantity_unit_id = $validatedNewItem['default_quantity_unit_id'];
+
+        if ($validatedNewItem['default_quantity_unit_id']) {
+            $item->default_quantity_unit_id = $validatedNewItem['default_quantity_unit_id'];
+        }
 
         $item->save();
 
