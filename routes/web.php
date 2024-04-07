@@ -44,6 +44,7 @@ Route::put('/api/item/category/{categoryId}/bulk', [ItemController::class, 'bulk
 // Lists
 Route::get('/api/list', [ListController::class, 'index'])->middleware('auth:web');
 Route::post('/api/list', [ListController::class, 'store'])->middleware('auth:web');
+Route::put('/api/list/{list}', [ListController::class, 'update'])->middleware('auth:web')->middleware('can:update,list');
 Route::delete('/api/list/{list}', [ListController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,list');
 Route::get('/api/list/{list}', [ListController::class, 'singleList'])->middleware('auth:web')->middleware('can:view,list');
 Route::post('/api/list/{list}/add-item', [ListController::class, 'addItem'])->middleware('auth:web')->middleware('can:update,list');
@@ -85,11 +86,13 @@ Route::post('/api/menu/{menu}/remove-recipe', [MenuController::class, 'removeRec
 // Categories
 Route::get('/api/category', [CategoryController::class, 'index'])->middleware('auth:web');
 Route::post('/api/category', [CategoryController::class, 'store'])->middleware('auth:web');
+Route::put('/api/category/{category}', [CategoryController::class, 'update'])->middleware('auth:web')->middleware('can:update,category');
 Route::delete('/api/category/{category}', [CategoryController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,category');
 
 // Recipe categories
 Route::get('/api/recipe-category', [RecipeCategoryController::class, 'index'])->middleware('auth:web');
 Route::post('/api/recipe-category', [RecipeCategoryController::class, 'store'])->middleware('auth:web');
+Route::put('/api/recipe-category/{recipeCategory}', [RecipeCategoryController::class, 'update'])->middleware('auth:web')->middleware('can:update,recipeCategory');
 Route::delete('/api/recipe-category/{recipeCategory}', [RecipeCategoryController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,recipeCategory');
 
 // Quantity units

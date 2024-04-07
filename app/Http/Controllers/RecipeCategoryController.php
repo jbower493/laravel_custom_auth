@@ -43,6 +43,21 @@ class RecipeCategoryController extends Controller
         ];
     }
 
+    public function update(Request $request, RecipeCategory $recipeCategory)
+    {
+        $validatedRequest = $request->validate([
+            'name' => ['required']
+        ]);
+
+        $recipeCategory->name = $validatedRequest['name'];
+
+        $recipeCategory->save();
+
+        return [
+            'message' => 'Recipe category successfully updated'
+        ];
+    }
+
     public function delete(RecipeCategory $recipeCategory)
     {
         // set all Recipe with that recipe category to have a recipe category of null, before deleting the recipe category

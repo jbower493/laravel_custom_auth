@@ -47,6 +47,21 @@ class ListController extends Controller
         ];
     }
 
+    public function update(Request $request, ShoppingList $list)
+    {
+        $validatedRequest = $request->validate([
+            'name' => ['required']
+        ]);
+
+        $list->name = $validatedRequest['name'];
+
+        $list->save();
+
+        return [
+            'message' => 'List successfully updated.'
+        ];
+    }
+
     public function delete(ShoppingList $list)
     {
         // Remove all items from list before deleting

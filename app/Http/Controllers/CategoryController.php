@@ -43,6 +43,21 @@ class CategoryController extends Controller
         ];
     }
 
+    public function update(Request $request, Category $category)
+    {
+        $validatedRequest = $request->validate([
+            'name' => ['required']
+        ]);
+
+        $category->name = $validatedRequest['name'];
+
+        $category->save();
+
+        return [
+            'message' => 'Category successfully updated'
+        ];
+    }
+
     public function delete(Category $category)
     {
         // set all items with that category to have a category of null, before deleting the category
