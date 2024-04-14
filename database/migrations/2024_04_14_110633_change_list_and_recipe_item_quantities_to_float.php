@@ -14,8 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::table('list_item', function (Blueprint $table) {
-            $table->integer('quantity')->nullable()->default(1);
-            $table->foreignId('quantity_unit_id')->nullable()->constrained('quantity_units');
+            $table->float('quantity')->change();
+        });
+
+        Schema::table('recipe_item', function (Blueprint $table) {
+            $table->float('quantity')->change();
         });
     }
 
@@ -27,8 +30,11 @@ return new class extends Migration
     public function down()
     {
         Schema::table('list_item', function (Blueprint $table) {
-            $table->dropColumn('quantity');
-            $table->dropColumn('quantity_unit_id');
+            $table->integer('quantity')->change();
+        });
+
+        Schema::table('recipe_item', function (Blueprint $table) {
+            $table->integer('quantity')->change();
         });
     }
 };
