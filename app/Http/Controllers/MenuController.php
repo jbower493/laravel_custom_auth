@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Menu;
 use App\Models\Recipe;
+use Illuminate\Support\Facades\Validator;
 
 class MenuController extends Controller
 {
@@ -84,9 +85,18 @@ class MenuController extends Controller
         ];
     }
 
-    public function addRecipe(Menu $menu, Recipe $recipe)
+    public function addRecipe(Request $request, Menu $menu, Recipe $recipe)
     {
-        $menu->recipes()->attach($recipe->id);
+        $validatedRequest = Validator::make(
+            [
+                'day' => $request['day']
+            ],
+            [
+                'day' => 'nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            ]
+        )->validate();
+
+        $menu->recipes()->attach($recipe->id, ['day' => $validatedRequest['day'] ?? null]);
 
         return [
             'message' => 'Recipe successfully added to menu.'
