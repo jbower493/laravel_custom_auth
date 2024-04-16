@@ -103,6 +103,24 @@ class MenuController extends Controller
         ];
     }
 
+    public function updateMenuRecipe(Request $request, Menu $menu, Recipe $recipe)
+    {
+        $validatedRequest = Validator::make(
+            [
+                'day' => $request['day']
+            ],
+            [
+                'day' => 'nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            ]
+        )->validate();
+
+        $menu->recipes()->updateExistingPivot($recipe['id'], ['day' => $validatedRequest['day'] ?? null]);
+
+        return [
+            'message' => 'Menu recipe successfully updated.'
+        ];
+    }
+
     public function removeRecipe(Request $request, Menu $menu)
     {
         $validatedRequest = $request->validate([

@@ -80,6 +80,10 @@ Route::post('/api/menu/{menu}/add-recipe/{recipe}', [MenuController::class, 'add
     ->middleware('auth:web')
     ->middleware('can:update,menu')
     ->middleware('can:update,recipe');
+Route::put('/api/menu/{menu}/update-menu-recipe/{recipe}', [MenuController::class, 'updateMenuRecipe'])
+    ->middleware('auth:web')
+    ->middleware('can:update,menu')
+    ->middleware('can:update,recipe');
 Route::post('/api/menu/{menu}/remove-recipe', [MenuController::class, 'removeRecipe'])
     ->middleware('auth:web')
     ->middleware('can:update,menu');
