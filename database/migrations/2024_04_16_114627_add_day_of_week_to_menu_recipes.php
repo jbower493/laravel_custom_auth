@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('menu_recipe', function (Blueprint $table) {
-            $table->string('day')->nullable();
+            $table->date('day')->nullable();
         });
     }
 
