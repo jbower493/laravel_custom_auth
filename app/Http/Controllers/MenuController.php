@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Menu;
 use App\Models\Recipe;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 class MenuController extends Controller
@@ -92,11 +93,13 @@ class MenuController extends Controller
                 'day' => $request['day']
             ],
             [
-                'day' => 'nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+                'day' => 'nullable|date_format:Y-m-d',
             ]
         )->validate();
 
-        $menu->recipes()->attach($recipe->id, ['day' => $validatedRequest['day'] ?? null]);
+        $date = $validatedRequest['day'] ? Carbon::createFromFormat('Y-m-d', $validatedRequest['day']) : null;
+
+        $menu->recipes()->attach($recipe->id, ['day' => $date]);
 
         return [
             'message' => 'Recipe successfully added to menu.'
@@ -110,11 +113,13 @@ class MenuController extends Controller
                 'day' => $request['day']
             ],
             [
-                'day' => 'nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+                'day' => 'nullable|date_format:Y-m-d',
             ]
         )->validate();
 
-        $menu->recipes()->updateExistingPivot($recipe['id'], ['day' => $validatedRequest['day'] ?? null]);
+        $date = $validatedRequest['day'] ? Carbon::createFromFormat('Y-m-d', $validatedRequest['day']) : null;
+
+        $menu->recipes()->updateExistingPivot($recipe['id'], ['day' => $date]);
 
         return [
             'message' => 'Menu recipe successfully updated.'
