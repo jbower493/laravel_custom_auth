@@ -29,22 +29,5 @@ return [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-    ],
-    'doctrine' => [
-        'default_entity_manager' => 'default',
-        'entity_managers' => [
-            'default' => [
-                'dev' => env('APP_DEBUG'),
-                'meta' => [
-                    'entity_path' => [
-                        base_path('app/Entities')
-                    ],
-                    'auto_generate_proxies' => env('DOCTRINE_AUTO_GENERATE_PROXIES', false),
-                    'proxy_dir' => env('DOCTRINE_PROXY_DIR', null),
-                    'cache' => null,
-                ],
-                'connection' => 'mysql', // Your database connection
-            ],
-        ],
-    ],
+    ]
 ];
