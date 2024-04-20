@@ -7,6 +7,7 @@ use App\Models\Item;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ItemController extends Controller
 {
@@ -28,18 +29,23 @@ class ItemController extends Controller
     {
         $loggedInUserId = Auth::id();
 
-        $validatedItem = Validator::make(
+        $validator = Validator::make(
             [
                 'name' => $request['name'],
                 'category_id' => $request['category_id'] ?? null,
                 'default_quantity_unit_id' => $request['default_quantity_unit_id'] ?? null
             ],
             [
-                'name' => ['required'],
+                'name' => [
+                    'required',
+                    Rule::unique('items', 'name')->where('user_id', $loggedInUserId)
+                ],
                 'category_id' => ['nullable', 'integer'],
                 'default_quantity_unit_id' => ['nullable', 'integer']
             ]
-        )->validate();
+        );
+
+        $validatedItem = $validator->validate();
 
         $item = Item::create([
             'name' => $validatedItem['name'],
