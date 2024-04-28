@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => config('APP_ENV') === 'production' ? ['https://shoppinglist.jbwebsites.work'] : ['http://localhost:3000'],
+    'allowed_origins' => config('APP_ENV') === 'production' ? ['https://shoppinglist.jamiebowerdev.com'] : ['http://localhost:3000'],
 
     'allowed_origins_patterns' => [],
 
