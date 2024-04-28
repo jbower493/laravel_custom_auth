@@ -241,9 +241,11 @@ class RecipeController extends Controller
         ]);
 
         foreach ($recipe->items as $recipeItemPivot) {
+            $quantityUnit = $recipeItemPivot->item_quantity->quantityUnit;
+
             $existingRecipeItemPivotAttributes = [
                 'quantity' => $recipeItemPivot->item_quantity->quantity,
-                'quantity_unit_id' => $recipeItemPivot->item_quantity->quantityUnit->id
+                'quantity_unit_id' => $quantityUnit ? $quantityUnit->id : null
             ];
 
             $newRecipe->items()->attach($recipeItemPivot, $existingRecipeItemPivotAttributes);
