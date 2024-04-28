@@ -218,22 +218,24 @@ class RecipeController extends Controller
         ];
     }
 
-    public function duplicate(Recipe $recipe)
+    public function duplicate(Request $request, Recipe $recipe)
     {
+        $validatedRequest = $request->validate([
+            "name" => 'required'
+        ]);
+
         $loggedInUserId = Auth::id();
 
-        $duplicateName = $recipe->name . ' (copy)';
+        $existingRecipeWithSameName = Recipe::where('name', $validatedRequest)->where('user_id', $loggedInUserId)->first();
 
-        $existingDuplicate = Recipe::where('name', $duplicateName)->where('user_id', $loggedInUserId)->first();
-
-        if ($existingDuplicate) {
+        if ($existingRecipeWithSameName) {
             return response([
-                'errors' => ['A duplicate of this recipe already exists. Please rename the existing duplicate before duplicating again.']
+                'errors' => ['You already have an existing recipe with this name. Please choose a different name.']
             ], 400);
         }
 
         $newRecipe = Recipe::create([
-            'name' => $duplicateName,
+            'name' => $validatedRequest['name'],
             'recipe_category_id' => $recipe->recipe_category_id,
             'user_id' => $loggedInUserId
         ]);
