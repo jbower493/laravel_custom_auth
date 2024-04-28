@@ -8,7 +8,6 @@ use App\Models\Item;
 use App\Models\QuantityUnit;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\RecipeUtils\FromUrl;
 
 class RecipeController extends Controller
 {
@@ -219,23 +218,42 @@ class RecipeController extends Controller
         ];
     }
 
-    public function fromUrl(Request $request, Recipe $recipe)
+    public function duplicate(Recipe $recipe)
     {
-        $fromUrl = new FromUrl($request['url']);
+        $loggedInUserId = Auth::id();
 
-        $attemptInstructions = $fromUrl->getInstructions();
+        $duplicateName = $recipe->name . ' (copy)';
 
-        if (!$attemptInstructions['success']) {
+        $existingDuplicate = Recipe::where('name', $duplicateName)->where('user_id', $loggedInUserId)->first();
+
+        if ($existingDuplicate) {
             return response([
-                'errors' => ['Could not get instructions from the provided url.']
+                'errors' => ['A duplicate of this recipe already exists. Please rename the existing duplicate before duplicating again.']
             ], 400);
         }
 
-        $recipe->instructions = $attemptInstructions['instructions'];
-        $recipe->save();
+        $newRecipe = Recipe::create([
+            'name' => $duplicateName,
+            'recipe_category_id' => $recipe->recipe_category_id,
+            'user_id' => $loggedInUserId
+        ]);
+
+        foreach ($recipe->items as $recipeItemPivot) {
+            $existingRecipeItemPivotAttributes = [
+                'quantity' => $recipeItemPivot->item_quantity->quantity,
+                'quantity_unit_id' => $recipeItemPivot->item_quantity->quantityUnit->id
+            ];
+
+            $newRecipe->items()->attach($recipeItemPivot, $existingRecipeItemPivotAttributes);
+        }
+
+        $newRecipe->save();
 
         return [
-            'message' => 'Recipe successfully imported from url.'
+            'message' => 'Recipe successfully duplicated',
+            'data' => [
+                'new_recipe_id' => $newRecipe->id
+            ]
         ];
     }
 }
