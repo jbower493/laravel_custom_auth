@@ -196,10 +196,10 @@ class RecipeController extends Controller
             ]
         )->validate();
 
-        $newQuantityUnit = QuantityUnit::findOrFail($validatedRequest['quantity_unit_id']);
+        $newQuantityUnit = QuantityUnit::find($validatedRequest['quantity_unit_id']);
         $newPivotvalues = [
             'quantity' => $validatedRequest['quantity'],
-            "quantity_unit_id" => $newQuantityUnit->id
+            "quantity_unit_id" => $newQuantityUnit ? $newQuantityUnit->id : null
         ];
 
         $recipe->items()->updateExistingPivot($validatedRequest['item_id'], $newPivotvalues);
