@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -17,9 +18,13 @@ class AuthController extends Controller
         return '';
     }
 
-    public function getUser(Request $request)
+    public function getUser()
     {
         $user = Auth::user();
+
+        // If the current session is an additional user logged into someone else's account
+        $additionalUserId = Session::get('additional_user_id');
+        $additionalUser = User::find($additionalUserId);
 
         if (!$user) return response([
             'errors' => ['No user is currently logged in.']
@@ -28,7 +33,10 @@ class AuthController extends Controller
         return [
             'message' => 'Successfully retreived user.',
             'data' => [
-                'user' => $user
+                'user' => $user,
+                "additional_user" => $additionalUser ? [
+                    "email" => $additionalUser->email
+                ] : null
             ]
         ];
     }
@@ -41,6 +49,7 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
+            Session::remove('additional_user_id');
             $request->session()->regenerate();
 
             return [
@@ -75,6 +84,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
+        Session::remove('additional_user_data');
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
