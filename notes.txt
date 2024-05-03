@@ -1,0 +1,6 @@
+Current implementation of additional users:
+- "additional users" table which stores the "user id" (account granting access) and the "additional user id" (account being granted access)
+- when logging in as an additional user to another account, it just logs the parent account (account that granted access) in within the session, and adds the additional user id to the session payload
+- on logout, and login, remove the additional user id from the session payload
+- on the get user endpoint, return the additional user if there is one. Don't show the new "account" page to additional users, only the main user
+- for the new "account" endpoints, create a policy that says you cannot do any functions on the account (interact with additional users, change email, change password) as an additional user
