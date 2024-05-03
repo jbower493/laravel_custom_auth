@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Session;
 
 class AdditionalUserController extends Controller
 {
+    /**
+     * List all the users that have additional user access to this account
+     */
     public function index()
     {
         $loggedInUserId = Auth::id();
@@ -85,6 +88,33 @@ class AdditionalUserController extends Controller
 
         return [
             'message' => 'Successfully removed additional user.'
+        ];
+    }
+
+    /**
+     * List all the accounts that this account has additional user access to
+     */
+    public function accountAccess()
+    {
+        $loggedInUserId = Auth::id();
+
+        // TODO: speed up this query by doing it all in SQL instead of looping over and then querying in each iteration
+
+        $additionalUsersEntries = AdditionalUser::where('additional_user_id', $loggedInUserId)->get();
+
+        $accountsThisAccountHasAccessTo = $additionalUsersEntries->map(function ($item) {
+            $user = User::find($item->user_id);
+
+            return [
+                'email' => $user->email
+            ];
+        });
+
+        return [
+            'message' => 'Successfully retreived accounts this account has access to.',
+            'data' => [
+                'account_access' => $accountsThisAccountHasAccessTo
+            ]
         ];
     }
 

@@ -43,6 +43,8 @@ Route::get('/api/user/additional-user', [AdditionalUserController::class, 'index
 Route::post('/api/user/additional-user', [AdditionalUserController::class, 'store'])->middleware('auth:web');
 Route::post('/api/user/additional-user/remove', [AdditionalUserController::class, 'remove'])->middleware('auth:web');
 
+Route::get('/api/user/additional-user/account-access', [AdditionalUserController::class, 'accountAccess'])->middleware('auth:web');
+
 Route::post('/api/user/additional-user/login-as-another-user', [AdditionalUserController::class, 'loginAsAnotherUser'])->middleware('auth:web');
 
 // Items
