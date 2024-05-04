@@ -35,7 +35,8 @@ class AuthController extends Controller
             'data' => [
                 'user' => $user,
                 "additional_user" => $additionalUser ? [
-                    "email" => $additionalUser->email
+                    "email" => $additionalUser->email,
+                    "name" => $additionalUser->name
                 ] : null
             ]
         ];
