@@ -100,21 +100,24 @@ class AuthController extends Controller
 
         $request->validate(['email' => 'required|email']);
 
-        Password::sendResetLink(
+        $status = Password::sendResetLink(
             $request->only('email')
         );
 
-        // $status = Password::sendResetLink(
-        //     $request->only('email')
-        // );
+        // If successful OR user did not exist, send this generic message. We don't want to let the person know if the email exists in the system
+        if ($status === Password::INVALID_USER || $status === Password::RESET_LINK_SENT) {
+            return ['message' => 'If an account exists for this email address, we\'ve sent a password reset email. Click the link in the email to reset your password.'];
+        }
 
-        // return $status === Password::RESET_LINK_SENT
-        //     ? ['message' => 'Password reset email has been sent. Click the link in the email to reset your password.']
-        //     : response([
-        //         'errors' => ['Something went wrong.']
-        //     ], 500);
+        if ($status === Password::RESET_THROTTLED) {
+            return response([
+                'errors' => ['Too many requests in a short time. Please wait a bit and try again.']
+            ], 429);
+        }
 
-        return ['message' => 'If an account exists for this email address, we\'ve sent a password reset email. Click the link in the email to reset your password.'];
+        return response([
+            'errors' => ['Something went wrong.']
+        ], 500);
     }
 
     public function resetPassword(Request $request)
