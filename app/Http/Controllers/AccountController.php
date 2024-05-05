@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AdditionalUser;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\AdditionalUser;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
-class AdditionalUserController extends Controller
+class AccountController extends Controller
 {
     /**
      * List all the users that have additional user access to this account
@@ -149,6 +150,41 @@ class AdditionalUserController extends Controller
 
         return [
             'message' => 'Successfully logged into account as additional user.'
+        ];
+    }
+
+    public function changeEmail(Request $request)
+    {
+        $loggedInUser = Auth::user();
+
+        // TODO: This presents a security risk, telling the user if an email address has already been taken. Eventually change it to send them an email and make them confirm
+        $validatedRequest = $request->validate([
+            'new_email' => ['required', 'string', 'email', 'unique:users,email'],
+        ]);
+
+        $loggedInUser->email = $validatedRequest['new_email'];
+        $loggedInUser->save();
+
+        return [
+            'message' => 'Successfully changed account email address.'
+        ];
+    }
+
+    public function changePassword(Request $request)
+    {
+        $loggedInUser = Auth::user();
+
+        $validatedRequest = $request->validate([
+            "new_password" => ['required', 'string'],
+            "confirm_new_password" => ['required', 'string', 'same:new_password']
+        ]);
+
+        $loggedInUser->password = Hash::make($validatedRequest['new_password']);
+
+        $loggedInUser->save();
+
+        return [
+            'message' => 'Successfully changed account password.'
         ];
     }
 }

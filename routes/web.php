@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ItemController;
@@ -35,17 +36,18 @@ Route::get('/api/logout', [AuthController::class, 'logout'])->middleware('auth:w
 Route::post('/api/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
 Route::post('/api/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
+// Account
 /**
  * TODO: need send invite to add additional user, not just add it, but for now I will just add so I can get the feature working
  */
-// Additional Users
-Route::get('/api/user/additional-user', [AdditionalUserController::class, 'index'])->middleware('auth:web');
-Route::post('/api/user/additional-user', [AdditionalUserController::class, 'store'])->middleware('auth:web');
-Route::post('/api/user/additional-user/remove', [AdditionalUserController::class, 'remove'])->middleware('auth:web');
+Route::get('/api/user/additional-user', [AccountController::class, 'index'])->middleware('auth:web');
+Route::post('/api/user/additional-user', [AccountController::class, 'store'])->middleware('auth:web');
+Route::post('/api/user/additional-user/remove', [AccountController::class, 'remove'])->middleware('auth:web');
+Route::get('/api/user/additional-user/account-access', [AccountController::class, 'accountAccess'])->middleware('auth:web');
+Route::post('/api/user/additional-user/login-as-another-user', [AccountController::class, 'loginAsAnotherUser'])->middleware('auth:web');
 
-Route::get('/api/user/additional-user/account-access', [AdditionalUserController::class, 'accountAccess'])->middleware('auth:web');
-
-Route::post('/api/user/additional-user/login-as-another-user', [AdditionalUserController::class, 'loginAsAnotherUser'])->middleware('auth:web');
+Route::post('/api/user/change-email', [AccountController::class, 'changeEmail'])->middleware('auth:web');
+Route::post('/api/user/change-password', [AccountController::class, 'changePassword'])->middleware('auth:web');
 
 // Items
 Route::get('/api/item', [ItemController::class, 'index'])->middleware('auth:web');
