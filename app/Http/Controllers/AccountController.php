@@ -187,4 +187,17 @@ class AccountController extends Controller
             'message' => 'Successfully changed account password.'
         ];
     }
+
+    public function deleteAccount(Request $request, User $user)
+    {
+        $user->delete();
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return [
+            'message' => 'Account successfully deleted.'
+        ];
+    }
 }

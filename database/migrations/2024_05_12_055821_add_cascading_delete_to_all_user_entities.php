@@ -33,6 +33,12 @@ return new class extends Migration
         Schema::table('items', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->dropForeign(['default_quantity_unit_id']);
+            $table->foreign('default_quantity_unit_id')->references('id')->on('quantity_units')->onDelete('cascade');
+
+            $table->dropForeign(['category_id']);
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
         });
 
         // lists table
@@ -57,6 +63,9 @@ return new class extends Migration
         Schema::table('recipes', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->dropForeign(['recipe_category_id']);
+            $table->foreign('recipe_category_id')->references('id')->on('recipe_categories')->onDelete('cascade');
         });
 
         // recipe_categories table

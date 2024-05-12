@@ -48,6 +48,7 @@ Route::post('/api/user/additional-user/login-as-another-user', [AccountControlle
 
 Route::post('/api/user/change-email', [AccountController::class, 'changeEmail'])->middleware('auth:web');
 Route::post('/api/user/change-password', [AccountController::class, 'changePassword'])->middleware('auth:web');
+Route::delete('/api/user/{user}', [AccountController::class, 'deleteAccount'])->middleware('auth:web');
 
 // Items
 Route::get('/api/item', [ItemController::class, 'index'])->middleware('auth:web');
