@@ -53,12 +53,6 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
 
-        // quantity_units table
-        Schema::table('quantity_units', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
-
         // recipes table
         Schema::table('recipes', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
