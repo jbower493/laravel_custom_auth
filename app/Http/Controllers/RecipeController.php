@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\Item;
 use App\Models\QuantityUnit;
+use App\Models\RecipeShareRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -258,6 +259,25 @@ class RecipeController extends Controller
             'data' => [
                 'new_recipe_id' => $newRecipe->id
             ]
+        ];
+    }
+
+    public function createShareRequest(Request $request, Recipe $recipe)
+    {
+        $validatedRequest = $request->validate([
+            'email' => ['required', 'string', 'email']
+        ]);
+
+        $loggedInUserId = Auth::id();
+
+        RecipeShareRequest::create([
+            'owner_id' => $loggedInUserId,
+            'recipient_email' => $validatedRequest['email'],
+            'recipe_id' => $recipe->id
+        ]);
+
+        return [
+            'message' => 'Recipe successfully shared with ' . $validatedRequest['email'],
         ];
     }
 }
