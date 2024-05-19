@@ -221,7 +221,9 @@ class AccountController extends Controller
 
         return [
             'message' => 'Successfully fetched notifications.',
-            'data' => $ShareRequests
+            'data' => [
+                "notifications" => $ShareRequests
+            ]
         ];
     }
 }
