@@ -86,6 +86,7 @@ Route::put('/api/recipe/{recipe}/update-item-quantity', [RecipeController::class
 Route::post('/api/recipe/{recipe}/remove-item', [RecipeController::class, 'removeItem'])->middleware('auth:web')->middleware('can:update,recipe');
 Route::post('/api/recipe/{recipe}/duplicate', [RecipeController::class, 'duplicate'])->middleware('auth:web')->middleware('can:view,recipe');
 Route::post('/api/recipe/{recipe}/create-share-request', [RecipeController::class, 'createShareRequest'])->middleware('auth:web')->middleware('can:view,recipe');
+Route::post('/api/recipe/accept-share-request/{recipeShareRequest}', [RecipeController::class, 'acceptShareRequest'])->middleware('auth:web');
 
 // Menu
 Route::get('/api/menu', [MenuController::class, 'index'])->middleware('auth:web');

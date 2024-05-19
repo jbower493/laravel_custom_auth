@@ -7,6 +7,7 @@ use App\Models\Recipe;
 use App\Models\Item;
 use App\Models\QuantityUnit;
 use App\Models\RecipeShareRequest;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -278,6 +279,60 @@ class RecipeController extends Controller
 
         return [
             'message' => 'Recipe successfully shared with ' . $validatedRequest['email'],
+        ];
+    }
+
+    public function acceptShareRequest(Request $request, RecipeShareRequest $recipeShareRequest)
+    {
+        $loggedInUserId = Auth::id();
+        $loggedInUser = User::find($loggedInUserId);
+
+        if ($recipeShareRequest->recipient_email !== $loggedInUser->email) {
+            return response([
+                'errors' => ['You are not authorized to access this resource.']
+            ], 403);
+        }
+
+        $validatedRequest = $request->validate([
+            "name" => 'required'
+        ]);
+
+        $existingRecipeWithSameName = Recipe::where('name', $validatedRequest)->where('user_id', $loggedInUserId)->first();
+
+        if ($existingRecipeWithSameName) {
+            return response([
+                'errors' => ['You already have an existing recipe with this name. Please choose a different name.']
+            ], 400);
+        }
+
+        $recipeToShare = Recipe::find($recipeShareRequest->recipe_id);
+
+        $newRecipe = Recipe::create([
+            'name' => $validatedRequest['name'],
+            'recipe_category_id' => $recipeToShare->recipe_category_id,
+            'user_id' => $loggedInUserId
+        ]);
+
+        foreach ($recipeToShare->items as $recipeItemPivot) {
+            $quantityUnit = $recipeItemPivot->item_quantity->quantityUnit;
+
+            $existingRecipeItemPivotAttributes = [
+                'quantity' => $recipeItemPivot->item_quantity->quantity,
+                'quantity_unit_id' => $quantityUnit ? $quantityUnit->id : null
+            ];
+
+            $newRecipe->items()->attach($recipeItemPivot, $existingRecipeItemPivotAttributes);
+        }
+
+        $newRecipe->save();
+
+        $recipeShareRequest->delete();
+
+        return [
+            'message' => 'Recipe successfully created.',
+            'data' => [
+                'new_recipe_id' => $newRecipe->id
+            ]
         ];
     }
 }
