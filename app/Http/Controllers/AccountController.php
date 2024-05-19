@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AdditionalUser;
+use App\Models\RecipeShareRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -198,6 +199,29 @@ class AccountController extends Controller
 
         return [
             'message' => 'Account successfully deleted.'
+        ];
+    }
+
+    public function notifications()
+    {
+        $loggedInUserId = Auth::id();
+        $loggedInUser = User::find($loggedInUserId);
+
+        // For now, the only notifications we have are recipe share request so we'll just list them.
+
+        $recipeShareRequestsCollection = RecipeShareRequest::where('recipient_email', $loggedInUser->email)->get();
+
+        $ShareRequests = $recipeShareRequestsCollection->map(function ($recipeShareRequest) {
+            return [
+                'share_request_id' => $recipeShareRequest->id,
+                'owner_name' => $recipeShareRequest->owner->name,
+                'recipe_name' => $recipeShareRequest->recipe->name
+            ];
+        })->toArray();
+
+        return [
+            'message' => 'Successfully fetched notifications.',
+            'data' => $ShareRequests
         ];
     }
 }

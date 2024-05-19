@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Recipe;
+use App\Models\User;
 
 class RecipeShareRequest extends Model
 {
@@ -16,4 +18,14 @@ class RecipeShareRequest extends Model
     ];
 
     protected $hidden = ['created_at', 'updated_at'];
+
+    public function recipe()
+    {
+        return $this->belongsTo(Recipe::class);
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id', 'id');
+    }
 }
