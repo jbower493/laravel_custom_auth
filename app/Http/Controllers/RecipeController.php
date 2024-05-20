@@ -239,7 +239,8 @@ class RecipeController extends Controller
         $newRecipe = Recipe::create([
             'name' => $validatedRequest['name'],
             'recipe_category_id' => $recipe->recipe_category_id,
-            'user_id' => $loggedInUserId
+            'user_id' => $loggedInUserId,
+            'instructions' => $recipe->instructions
         ]);
 
         foreach ($recipe->items as $recipeItemPivot) {
@@ -309,8 +310,9 @@ class RecipeController extends Controller
 
         $newRecipe = Recipe::create([
             'name' => $validatedRequest['name'],
-            'recipe_category_id' => $recipeToShare->recipe_category_id,
-            'user_id' => $loggedInUserId
+            'recipe_category_id' => null,
+            'user_id' => $loggedInUserId,
+            'instructions' => $recipeToShare->instructions
         ]);
 
         foreach ($recipeToShare->items as $recipeItemPivot) {
