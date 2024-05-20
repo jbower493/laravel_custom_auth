@@ -315,6 +315,7 @@ class RecipeController extends Controller
             'instructions' => $recipeToShare->instructions
         ]);
 
+        // TODO: cant do this because the items don't belong to the recipient user. For each item, need to either create or get correct id before adding.
         foreach ($recipeToShare->items as $recipeItemPivot) {
             $quantityUnit = $recipeItemPivot->item_quantity->quantityUnit;
 
