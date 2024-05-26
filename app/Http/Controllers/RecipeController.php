@@ -315,7 +315,6 @@ class RecipeController extends Controller
             'instructions' => $recipeToShare->instructions
         ]);
 
-        // TODO: cant do this because the items don't belong to the recipient user. For each item, need to either create or get correct id before adding.
         foreach ($recipeToShare->items as $recipeItemPivot) {
             $quantityUnit = $recipeItemPivot->item_quantity->quantityUnit;
 
@@ -324,7 +323,19 @@ class RecipeController extends Controller
                 'quantity_unit_id' => $quantityUnit ? $quantityUnit->id : null
             ];
 
-            $newRecipe->items()->attach($recipeItemPivot, $existingRecipeItemPivotAttributes);
+            // If the user accepting the share request already has an item with that name, use the existing item. If not, create a new item with no category
+            $item = Item::where('name', $recipeItemPivot->name)->where('user_id', $loggedInUserId)->first();
+
+            if (!$item) {
+                $item = Item::create([
+                    'name' => $recipeItemPivot->name,
+                    'category_id' => null,
+                    'user_id' => $loggedInUserId,
+                    'default_quantity_unit_id' => $recipeItemPivot->defautl_quantity_unit_id
+                ]);
+            }
+
+            $newRecipe->items()->attach($item->id, $existingRecipeItemPivotAttributes);
         }
 
         $newRecipe->save();
