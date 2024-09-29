@@ -10,7 +10,6 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\QuantityUnitsController;
 use App\Http\Controllers\RecipeCategoryController;
-use App\Http\Controllers\AdditionalUserController;
 
 // use App\Mail\Welcome;
 // use Illuminate\Support\Facades\Mail;
