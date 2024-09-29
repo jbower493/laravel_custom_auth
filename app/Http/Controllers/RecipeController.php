@@ -279,7 +279,7 @@ class RecipeController extends Controller
         ]);
 
         return [
-            'message' => 'Recipe successfully shared with ' . $validatedRequest['email'],
+            'message' => 'Recipe successfully shared with ' . $validatedRequest['email'] . '. An email has been sent to the recipient to notify them that the recipe has been shared with them.',
         ];
     }
 
