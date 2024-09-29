@@ -10,6 +10,8 @@ use App\Models\RecipeShareRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Mail\SharedRecipe;
+use Illuminate\Support\Facades\Mail;
 
 class RecipeController extends Controller
 {
@@ -277,6 +279,8 @@ class RecipeController extends Controller
             'recipient_email' => $validatedRequest['email'],
             'recipe_id' => $recipe->id
         ]);
+
+        Mail::to($validatedRequest['email'])->send(new SharedRecipe());
 
         return [
             'message' => 'Recipe successfully shared with ' . $validatedRequest['email'] . '. An email has been sent to the recipient to notify them that the recipe has been shared with them.',

@@ -1,0 +1,1 @@
+<h1>Recipe was shared with you</h1>
