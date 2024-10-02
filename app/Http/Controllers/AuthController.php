@@ -72,15 +72,28 @@ class AuthController extends Controller
             "confirm_password" => ['required', 'string', 'same:password']
         ]);
 
-        User::create([
+        $newUser = User::create([
             'name' => $fields['name'],
             'email' => $fields['email'],
             'password' => Hash::make($fields['password'])
         ]);
 
-        return [
-            'message' => 'Registration successful.'
-        ];
+        // Log them straight in
+        if (Auth::attempt([
+            'email' => $newUser->email,
+            'password' => $fields['password'],
+        ])) {
+            Session::remove('additional_user_id');
+            $request->session()->regenerate();
+
+            return [
+                'message' => 'Registration successful.'
+            ];
+        }
+
+        return response([
+            'errors' => ['Something went wrong.']
+        ], 500);
     }
 
     public function logout(Request $request)

@@ -15,21 +15,23 @@ class SharedRecipe extends Mailable
     use Queueable, SerializesModels;
 
     private $sharerName;
-
+    private $recipientIsExistingUser;
     private $shareRequestId;
-
     private $recipe;
+    private $recipientEmail;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($sharerName, $shareRequestId, Recipe $recipe)
+    public function __construct($sharerName, $recipientEmail, $recipientIsExistingUser, $shareRequestId, Recipe $recipe)
     {
         $this->sharerName = $sharerName;
+        $this->recipientIsExistingUser = $recipientIsExistingUser;
         $this->shareRequestId = $shareRequestId;
         $this->recipe = $recipe;
+        $this->recipientEmail = $recipientEmail;
     }
 
     /**
@@ -51,11 +53,14 @@ class SharedRecipe extends Mailable
      */
     public function content()
     {
+        $urlActionSearchParam = $this->recipientIsExistingUser ? 'login' : 'register';
+
         return new Content(
             markdown: 'emails.sharedRecipe',
             with: [
-                'url' => 'http://localhost:3000/recipes/accept-shared/' . $this->shareRequestId,
+                'url' => 'http://localhost:3000/recipes/accept-shared/' . $this->shareRequestId . '?action=' . $urlActionSearchParam . '&recipient-email=' . $this->recipientEmail,
                 'recipeName' => $this->recipe->name,
+                'recipientEmail' => $this->recipientEmail,
                 'sharerName' => $this->sharerName
             ]
         );
