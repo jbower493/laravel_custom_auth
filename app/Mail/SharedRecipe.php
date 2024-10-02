@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Recipe;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -13,14 +14,19 @@ class SharedRecipe extends Mailable
 {
     use Queueable, SerializesModels;
 
+    private $sharerName;
+
+    private $recipe;
+
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($sharerName, Recipe $recipe)
     {
-        //
+        $this->sharerName = $sharerName;
+        $this->recipe = $recipe;
     }
 
     /**
@@ -43,7 +49,12 @@ class SharedRecipe extends Mailable
     public function content()
     {
         return new Content(
-            view: 'emails.sharedRecipe',
+            markdown: 'emails.sharedRecipe',
+            with: [
+                'url' => 'http://localhost:3000/recipes/accept-shared/' . $this->recipe->id,
+                'recipeName' => $this->recipe->name,
+                'sharerName' => $this->sharerName
+            ]
         );
     }
 
