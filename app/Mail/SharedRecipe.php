@@ -16,6 +16,8 @@ class SharedRecipe extends Mailable
 
     private $sharerName;
 
+    private $shareRequestId;
+
     private $recipe;
 
     /**
@@ -23,9 +25,10 @@ class SharedRecipe extends Mailable
      *
      * @return void
      */
-    public function __construct($sharerName, Recipe $recipe)
+    public function __construct($sharerName, $shareRequestId, Recipe $recipe)
     {
         $this->sharerName = $sharerName;
+        $this->shareRequestId = $shareRequestId;
         $this->recipe = $recipe;
     }
 
@@ -51,7 +54,7 @@ class SharedRecipe extends Mailable
         return new Content(
             markdown: 'emails.sharedRecipe',
             with: [
-                'url' => 'http://localhost:3000/recipes/accept-shared/' . $this->recipe->id,
+                'url' => 'http://localhost:3000/recipes/accept-shared/' . $this->shareRequestId,
                 'recipeName' => $this->recipe->name,
                 'sharerName' => $this->sharerName
             ]

@@ -275,13 +275,13 @@ class RecipeController extends Controller
         $loggedInUserId = Auth::id();
         $loggedInUser = User::find($loggedInUserId);
 
-        RecipeShareRequest::create([
+        $newShareRequest = RecipeShareRequest::create([
             'owner_id' => $loggedInUserId,
             'recipient_email' => $validatedRequest['email'],
             'recipe_id' => $recipe->id
         ]);
 
-        Mail::to($validatedRequest['email'])->send(new SharedRecipe($loggedInUser->name, $recipe));
+        Mail::to($validatedRequest['email'])->send(new SharedRecipe($loggedInUser->name, $newShareRequest->id, $recipe));
 
         return [
             'message' => 'Recipe successfully shared with ' . $validatedRequest['email'] . '. An email has been sent to the recipient to notify them that the recipe has been shared with them.',
