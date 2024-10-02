@@ -53,12 +53,13 @@ class SharedRecipe extends Mailable
      */
     public function content()
     {
+        $frontendBaseUrl = config('app.env') === 'production' ? 'https://shoppinglist.jamiebowerdev.com' : 'http://localhost:3000';
         $urlActionSearchParam = $this->recipientIsExistingUser ? 'login' : 'register';
 
         return new Content(
             markdown: 'emails.sharedRecipe',
             with: [
-                'url' => 'http://localhost:3000/recipes/accept-shared/' . $this->shareRequestId . '?action=' . $urlActionSearchParam . '&recipient-email=' . $this->recipientEmail,
+                'url' => $frontendBaseUrl . '/recipes/accept-shared/' . $this->shareRequestId . '?action=' . $urlActionSearchParam . '&recipient-email=' . $this->recipientEmail,
                 'recipeName' => $this->recipe->name,
                 'recipientEmail' => $this->recipientEmail,
                 'sharerName' => $this->sharerName
