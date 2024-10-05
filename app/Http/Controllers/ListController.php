@@ -43,7 +43,10 @@ class ListController extends Controller
         $list->save();
 
         return [
-            'message' => 'List successfully created.'
+            'message' => 'List successfully created.',
+            'data' => [
+                'list_id' => $list->id
+            ]
         ];
     }
 
