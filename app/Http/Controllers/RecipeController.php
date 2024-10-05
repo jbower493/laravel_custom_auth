@@ -53,7 +53,10 @@ class RecipeController extends Controller
         $recipe->save();
 
         return [
-            'message' => 'Recipe successfully created.'
+            'message' => 'Recipe successfully created.',
+            'data' => [
+                'recipe_id' => $recipe->id
+            ]
         ];
     }
 
