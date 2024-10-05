@@ -36,10 +36,12 @@ class RecipeController extends Controller
         $validatedRecipe = Validator::make(
             [
                 'name' => $request['name'],
+                'instructions' => $request['instructions'],
                 'recipe_category_id' => $request['recipe_category_id'] ?? null
             ],
             [
                 'name' => ['required'],
+                'instructions' => ['string', 'nullable'],
                 'recipe_category_id' => ['nullable', 'integer']
             ]
         )->validate();
@@ -47,6 +49,7 @@ class RecipeController extends Controller
         $recipe = Recipe::create([
             'name' => $validatedRecipe['name'],
             'recipe_category_id' => $validatedRecipe['recipe_category_id'],
+            'instructions' => $validatedRecipe['instructions'] ?? '',
             'user_id' => $loggedInUserId
         ]);
 
