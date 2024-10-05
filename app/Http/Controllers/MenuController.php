@@ -41,7 +41,10 @@ class MenuController extends Controller
         $menu->save();
 
         return [
-            'message' => 'Menu successfully created.'
+            'message' => 'Menu successfully created.',
+            'data' => [
+                'menu_id' => $menu->id
+            ]
         ];
     }
 
