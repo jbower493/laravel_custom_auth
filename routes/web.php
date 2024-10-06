@@ -10,6 +10,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\QuantityUnitsController;
 use App\Http\Controllers\RecipeCategoryController;
+use Illuminate\Support\Facades\Storage;
 
 // use App\Mail\Welcome;
 // use Illuminate\Support\Facades\Mail;
@@ -88,6 +89,7 @@ Route::post('/api/recipe/{recipe}/remove-item', [RecipeController::class, 'remov
 Route::post('/api/recipe/{recipe}/duplicate', [RecipeController::class, 'duplicate'])->middleware('auth:web')->middleware('can:view,recipe');
 Route::post('/api/recipe/{recipe}/create-share-request', [RecipeController::class, 'createShareRequest'])->middleware('auth:web')->middleware('can:view,recipe');
 Route::post('/api/recipe/accept-share-request/{recipeShareRequest}', [RecipeController::class, 'acceptShareRequest'])->middleware('auth:web');
+Route::post('/api/recipe/{recipe}/upload-image', [RecipeController::class, 'uploadImage'])->middleware('auth:web')->middleware('can:update,recipe');
 
 // Menu
 Route::get('/api/menu', [MenuController::class, 'index'])->middleware('auth:web');

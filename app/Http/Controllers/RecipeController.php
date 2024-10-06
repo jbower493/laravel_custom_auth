@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\SharedRecipe;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class RecipeController extends Controller
 {
@@ -359,6 +360,27 @@ class RecipeController extends Controller
             'message' => 'Recipe successfully created.',
             'data' => [
                 'new_recipe_id' => $newRecipe->id
+            ]
+        ];
+    }
+
+    public function uploadImage(Request $request, Recipe $recipe) {
+        $request->validate([
+            'recipe_image' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048'
+        ]);
+
+        $path = $request->file('recipe_image')->store('recipe-images');
+
+        if (!$path) {
+            return response([
+                'errors' => ['Failed to upload image.']
+            ], 500);
+        }
+
+        return [
+            'message' => 'Recipe image successfully added.',
+            'data' => [
+                'url' => Storage::url($path)
             ]
         ];
     }
