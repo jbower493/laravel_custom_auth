@@ -366,7 +366,8 @@ class RecipeController extends Controller
 
     public function uploadImage(Request $request, Recipe $recipe) {
         $request->validate([
-            'recipe_image' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048'
+            // Size in kilobytes. TODO: optimize first so we're not uploading massive images to minio
+            'recipe_image' => 'required|file|mimes:jpg,jpeg,png,pdf|max:4096'
         ]);
 
         $path = $request->file('recipe_image')->store('recipe-images');
