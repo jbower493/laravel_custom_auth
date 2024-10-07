@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Item;
 use App\Models\RecipeCategory;
 use App\Models\Pivots\RecipeItemPivot;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Recipe extends Model
 {
@@ -19,7 +21,8 @@ class Recipe extends Model
         'name',
         'user_id',
         'instructions',
-        'recipe_category_id'
+        'recipe_category_id',
+        'image_url'
     ];
 
     // Eager load the recipe's recipe category by default
@@ -27,6 +30,14 @@ class Recipe extends Model
 
     // Omits the "recipe_category_id" from any collection of recipes that is retrieved
     protected $hidden = ['recipe_category_id', 'created_at', 'updated_at', 'user_id'];
+
+    // Accessor for "image_url" property of the recipe
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string | null $value) => $value ? Storage::url($value) : null,
+        );
+    }
 
     // This method has to be named the same as the "protected $with" name above, or we will get "call to undefined relationship"
     public function recipeCategory()

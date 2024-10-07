@@ -377,6 +377,9 @@ class RecipeController extends Controller
             ], 500);
         }
 
+        $recipe->image_url = $path;
+        $recipe->save();
+
         return [
             'message' => 'Recipe image successfully added.',
             'data' => [
