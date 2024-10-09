@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Mail\SharedRecipe;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class RecipeController extends Controller
 {
@@ -370,21 +372,33 @@ class RecipeController extends Controller
             'recipe_image' => 'required|file|mimes:jpg,jpeg,png,pdf|max:4096'
         ]);
 
-        $path = $request->file('recipe_image')->store('recipe-images');
+        $file = $request->file('recipe_image');
+        $mimeType = $file->getMimeType();
+        $extension = explode('/', $mimeType)[1];
 
-        if (!$path) {
+        $binaryFileData = $file->get();
+        $response = Http::withBody($binaryFileData, $mimeType)->post('http://localhost:4500/raw');
+
+        // NEXT STEP: try to send it in a raw TCP request
+
+        $processedBinaryFileData = $binaryFileData; // Eventually this will be what comes back from the processing server
+
+        $newFilePath = 'recipe-images/' . Str::random(40) . '.' . $extension;
+        $uploadSuccessful = Storage::put($newFilePath, $processedBinaryFileData);
+
+        if (!$uploadSuccessful) {
             return response([
                 'errors' => ['Failed to upload image.']
             ], 500);
         }
 
-        $recipe->image_url = $path;
+        $recipe->image_url = $newFilePath;
         $recipe->save();
 
         return [
             'message' => 'Recipe image successfully added.',
             'data' => [
-                'url' => Storage::url($path)
+                'url' => Storage::url($newFilePath)
             ]
         ];
     }
