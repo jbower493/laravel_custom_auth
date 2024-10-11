@@ -368,7 +368,7 @@ class RecipeController extends Controller
 
     public function uploadImage(Request $request, Recipe $recipe) {
         $request->validate([
-            // Size in kilobytes. TODO: optimize first so we're not uploading massive images to minio
+            // Size in kilobytes.
             'recipe_image' => 'required|file|mimes:jpg,jpeg,png,pdf|max:4096'
         ]);
 
@@ -384,9 +384,16 @@ class RecipeController extends Controller
             'param3' => 'value6'
         ]);
 
-        $processedBinaryFileData = $binaryFileData; // Eventually this will be what comes back from the processing server
+        if (!$response->successful()) {
+            return response([
+                'errors' => ['Failed to upload image. Processing failed']
+            ], 500);
+        }
 
-        $newFilePath = 'recipe-images/' . Str::random(40) . '.' . $extension;
+        // The binary data of the processed file we get back from the processing service
+        $processedBinaryFileData = $response->body();
+
+        $newFilePath = 'recipe-images/' . Str::random(40) . '.webp';
         $uploadSuccessful = Storage::put($newFilePath, $processedBinaryFileData);
 
         if (!$uploadSuccessful) {
@@ -402,8 +409,8 @@ class RecipeController extends Controller
             'message' => 'Recipe image successfully added.',
             'data' => [
                 'url' => Storage::url($newFilePath),
-                'res' => $response->__toString()
-            ]
+            ],
+            'status' => $response->status()
         ];
     }
 }
