@@ -377,9 +377,12 @@ class RecipeController extends Controller
         $extension = explode('/', $mimeType)[1];
 
         $binaryFileData = $file->get();
-        $response = Http::withBody($binaryFileData, $mimeType)->post('http://localhost:4500/raw');
 
-        // NEXT STEP: try to send it in a raw TCP request
+        $response = Http::attach('file_to_optimize', $binaryFileData, 'file_to_optimize.' . $extension, [
+            "Content-Type" => $mimeType
+        ])->post('http://localhost:8080/optimize-image', [
+            'param3' => 'value6'
+        ]);
 
         $processedBinaryFileData = $binaryFileData; // Eventually this will be what comes back from the processing server
 
@@ -398,7 +401,8 @@ class RecipeController extends Controller
         return [
             'message' => 'Recipe image successfully added.',
             'data' => [
-                'url' => Storage::url($newFilePath)
+                'url' => Storage::url($newFilePath),
+                'res' => $response->__toString()
             ]
         ];
     }
