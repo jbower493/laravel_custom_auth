@@ -386,7 +386,7 @@ class RecipeController extends Controller
 
         if (!$response->successful()) {
             return response([
-                'errors' => ['Failed to upload image. Processing failed']
+                'errors' => ['Failed to upload image, ' . $response->body()]
             ], 500);
         }
 
