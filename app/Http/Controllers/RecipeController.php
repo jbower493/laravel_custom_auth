@@ -380,7 +380,7 @@ class RecipeController extends Controller
 
         $response = Http::attach('file_to_optimize', $binaryFileData, 'file_to_optimize.' . $extension, [
             "Content-Type" => $mimeType
-        ])->post('http://localhost:8080/optimize-image', [
+        ])->post(env('IMAGE_PROCESSING_SERVICE_URL') . '/optimize-image', [
             'param3' => 'value6'
         ]);
 
