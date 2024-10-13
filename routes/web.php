@@ -90,6 +90,7 @@ Route::post('/api/recipe/{recipe}/duplicate', [RecipeController::class, 'duplica
 Route::post('/api/recipe/{recipe}/create-share-request', [RecipeController::class, 'createShareRequest'])->middleware('auth:web')->middleware('can:view,recipe');
 Route::post('/api/recipe/accept-share-request/{recipeShareRequest}', [RecipeController::class, 'acceptShareRequest'])->middleware('auth:web');
 Route::post('/api/recipe/{recipe}/upload-image', [RecipeController::class, 'uploadImage'])->middleware('auth:web')->middleware('can:update,recipe');
+Route::delete('/api/recipe/{recipe}/remove-image', [RecipeController::class, 'removeImage'])->middleware('auth:web')->middleware('can:update,recipe');
 
 // Menu
 Route::get('/api/menu', [MenuController::class, 'index'])->middleware('auth:web');

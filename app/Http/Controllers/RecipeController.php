@@ -394,18 +394,20 @@ class RecipeController extends Controller
         // The binary data of the processed file we get back from the processing service
         $processedBinaryFileData = $response->body();
 
-        // Once we've confirmed upload is successful, delete the old (now unused) image from storage
         $newFilePath = 'recipe-images/' . Str::random(40) . '.webp';
         $uploadSuccessful = Storage::put($newFilePath, $processedBinaryFileData);
-
+        
         if (!$uploadSuccessful) {
             return response([
                 'errors' => ['Failed to upload image.']
             ], 500);
         }
 
+        // Once we've confirmed upload is successful, delete the old (now unused) image from storage, if one exists
         $oldImagePath = $recipe->shortImageUrl;
-        Storage::delete($oldImagePath);
+        if ($oldImagePath) {
+            Storage::delete($oldImagePath);
+        }
 
         $recipe->image_url = $newFilePath;
         $recipe->save();
@@ -414,8 +416,19 @@ class RecipeController extends Controller
             'message' => 'Recipe image successfully added.',
             'data' => [
                 'url' => Storage::url($newFilePath),
-            ],
-            'status' => $response->status()
+            ]
+        ];
+    }
+
+    public function removeImage(Recipe $recipe) {
+        $currentImagePath = $recipe->shortImageUrl;
+        Storage::delete($currentImagePath);
+
+        $recipe->image_url = null;
+        $recipe->save();
+
+        return [
+            'message' => 'Recipe image successfully removed.'
         ];
     }
 }

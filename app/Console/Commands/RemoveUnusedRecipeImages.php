@@ -29,7 +29,7 @@ class RemoveUnusedRecipeImages extends Command
      */
     public function handle()
     {
-        echo 'Running cron: "RemoveUnusedRecipeImages"\n'; 
+        echo 'Running cron: RemoveUnusedRecipeImages' . "\n"; 
 
         // Get all files in the "recipe-images" folder (so we don't delete other images too)
         $files = Storage::allFiles('recipe-images');
