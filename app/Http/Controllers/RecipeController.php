@@ -369,7 +369,7 @@ class RecipeController extends Controller
     public function uploadImage(Request $request, Recipe $recipe) {
         $request->validate([
             // Size in kilobytes.
-            'recipe_image' => 'required|file|mimes:jpg,jpeg,png,pdf|max:4096'
+            'recipe_image' => 'required|file|mimes:jpg,jpeg,png|max:4096'
         ]);
 
         $file = $request->file('recipe_image');
@@ -378,6 +378,7 @@ class RecipeController extends Controller
 
         $binaryFileData = $file->get();
 
+        // Call image processing service to optimize the image and give us back optimized binary image data
         $response = Http::attach('file_to_optimize', $binaryFileData, 'file_to_optimize.' . $extension, [
             "Content-Type" => $mimeType
         ])->post(env('IMAGE_PROCESSING_SERVICE_URL') . '/optimize-image', [
@@ -393,6 +394,7 @@ class RecipeController extends Controller
         // The binary data of the processed file we get back from the processing service
         $processedBinaryFileData = $response->body();
 
+        // Once we've confirmed upload is successful, delete the old (now unused) image from storage
         $newFilePath = 'recipe-images/' . Str::random(40) . '.webp';
         $uploadSuccessful = Storage::put($newFilePath, $processedBinaryFileData);
 
@@ -401,6 +403,9 @@ class RecipeController extends Controller
                 'errors' => ['Failed to upload image.']
             ], 500);
         }
+
+        $oldImagePath = $recipe->shortImageUrl;
+        Storage::delete($oldImagePath);
 
         $recipe->image_url = $newFilePath;
         $recipe->save();

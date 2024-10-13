@@ -39,6 +39,11 @@ class Recipe extends Model
         );
     }
 
+    // Returns the actual url stored in the DB (without the Minio url prepended, like what the "imageUrl" accessor returns). This is used for deleting the old image when it's been replaced
+    protected function getShortImageUrlAttribute() {
+        return $this->attributes['image_url'];
+    }
+
     // This method has to be named the same as the "protected $with" name above, or we will get "call to undefined relationship"
     public function recipeCategory()
     {
