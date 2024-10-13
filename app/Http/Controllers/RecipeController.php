@@ -369,7 +369,7 @@ class RecipeController extends Controller
     public function uploadImage(Request $request, Recipe $recipe) {
         $request->validate([
             // Size in kilobytes.
-            'recipe_image' => 'required|file|mimes:jpg,jpeg,png|max:4096'
+            'recipe_image' => 'required|file|mimes:jpg,jpeg,png|max:8192'
         ]);
 
         $file = $request->file('recipe_image');
