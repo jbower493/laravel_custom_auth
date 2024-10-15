@@ -22,7 +22,9 @@ class Recipe extends Model
         'user_id',
         'instructions',
         'recipe_category_id',
-        'image_url'
+        'image_url',
+        'prep_time',
+        'serves'
     ];
 
     // Eager load the recipe's recipe category by default

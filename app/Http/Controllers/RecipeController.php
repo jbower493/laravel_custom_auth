@@ -40,12 +40,16 @@ class RecipeController extends Controller
             [
                 'name' => $request['name'],
                 'instructions' => $request['instructions'],
-                'recipe_category_id' => $request['recipe_category_id'] ?? null
+                'recipe_category_id' => $request['recipe_category_id'] ?? null,
+                'prep_time' => $request['prep_time'],
+                'serves' => $request['serves']
             ],
             [
                 'name' => ['required'],
                 'instructions' => ['string', 'nullable'],
-                'recipe_category_id' => ['nullable', 'integer']
+                'recipe_category_id' => ['nullable', 'integer'],
+                'prep_time' => ['nullable', 'integer'],
+                'serves' => ['nullable', 'integer']
             ]
         )->validate();
 
@@ -53,7 +57,9 @@ class RecipeController extends Controller
             'name' => $validatedRecipe['name'],
             'recipe_category_id' => $validatedRecipe['recipe_category_id'],
             'instructions' => $validatedRecipe['instructions'] ?? '',
-            'user_id' => $loggedInUserId
+            'user_id' => $loggedInUserId,
+            'prep_time' => $validatedRecipe['prep_time'],
+            'serves' => $validatedRecipe['serves']
         ]);
 
         $recipe->save();
@@ -73,12 +79,16 @@ class RecipeController extends Controller
             [
                 'name' => $request['name'],
                 'instructions' => $request['instructions'],
-                'recipe_category_id' => $request['recipe_category_id'] ?? null
+                'recipe_category_id' => $request['recipe_category_id'] ?? null,
+                'prep_time' => $request['prep_time'],
+                'serves' => $request['serves']
             ],
             [
                 'name' => ['required', 'string'],
                 'instructions' => ['string', 'nullable'],
-                'recipe_category_id' => ['nullable', 'integer']
+                'recipe_category_id' => ['nullable', 'integer'],
+                'prep_time' => ['nullable', 'integer'],
+                'serves' => ['nullable', 'integer']
             ]
         )->validate();
 
@@ -86,6 +96,8 @@ class RecipeController extends Controller
         $recipe->name = $validatedRecipeData['name'];
         $recipe->recipe_category_id = $validatedRecipeData['recipe_category_id'];
         $recipe->instructions = $validatedRecipeData['instructions'];
+        $recipe->prep_time = $validatedRecipeData['prep_time'];
+        $recipe->serves = $validatedRecipeData['serves'];
 
         // Save the model
         $recipe->save();
