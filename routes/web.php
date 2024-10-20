@@ -80,6 +80,7 @@ Route::post('/api/list/{list}/add-from-menu/{menu}', [ListController::class, 'ad
 // Recipe
 Route::get('/api/recipe', [RecipeController::class, 'index'])->middleware('auth:web');
 Route::post('/api/recipe', [RecipeController::class, 'store'])->middleware('auth:web');
+Route::post('/api/recipe/import-from-image', [RecipeController::class, 'importFromImage'])->middleware('auth:web');
 Route::delete('/api/recipe/{recipe}', [RecipeController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,recipe');
 Route::get('/api/recipe/{recipe}', [RecipeController::class, 'singleRecipe'])->middleware('auth:web')->middleware('can:view,recipe');
 Route::put('/api/recipe/{recipe}', [RecipeController::class, 'update'])->middleware('auth:web')->middleware('can:update,recipe');

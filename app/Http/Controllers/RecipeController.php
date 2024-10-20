@@ -72,6 +72,43 @@ class RecipeController extends Controller
         ];
     }
 
+    public function importFromImage(Request $request)
+    {
+        $request->validate([
+            // Size in kilobytes.
+            'import_from_image' => 'required|file|mimes:jpg,jpeg,png|max:8192'
+        ]);
+
+        $file = $request->file('import_from_image');
+        $mimeType = $file->getMimeType();
+        $extension = explode('/', $mimeType)[1];
+
+        $binaryFileData = $file->get();
+
+        // Call image processing service to optimize the image and give us back optimized binary image data
+        $response = Http::attach('image_to_text', $binaryFileData, 'image_to_text.' . $extension, [
+            "Content-Type" => $mimeType
+        ])->post(env('IMAGE_PROCESSING_SERVICE_URL') . '/image-to-text', [
+            'param3' => 'value6'
+        ]);
+
+        if (!$response->successful()) {
+            return response([
+                'errors' => ['Failed to import recipe from image']
+            ], 500);
+        }
+
+        $data = $response->json();
+        $textRegions = $data['text_regions'];
+
+        return [
+            'message' => 'Recipe successfully imported from image.',
+            'data' => [
+                'imported_recipe' => $textRegions,
+            ]
+        ];
+    }
+
     public function update(Request $request, Recipe $recipe)
     {
         // Validate the recipe data
