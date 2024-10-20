@@ -58,6 +58,8 @@ Route::post('/api/item', [ItemController::class, 'store'])->middleware('auth:web
 Route::put('/api/item/{item}', [ItemController::class, 'update'])->middleware('auth:web')->middleware('can:update,item');
 Route::delete('/api/item/{item}', [ItemController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,item');
 Route::put('/api/item/category/{categoryId}/bulk', [ItemController::class, 'bulkAssignCategory'])->middleware('auth:web');
+Route::post('/api/item/{item}/upload-image', [ItemController::class, 'uploadImage'])->middleware('auth:web')->middleware('can:update,item');
+Route::delete('/api/item/{item}/remove-image', [ItemController::class, 'removeImage'])->middleware('auth:web')->middleware('can:update,item');
 
 // Lists
 Route::get('/api/list', [ListController::class, 'index'])->middleware('auth:web');

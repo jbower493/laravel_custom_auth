@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Models\Category;
 use App\Models\QuantityUnit;
-use App\Models\Recipe;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Storage;
 
 class Item extends Model
 {
@@ -17,7 +18,8 @@ class Item extends Model
         'name',
         'category_id',
         'user_id',
-        'default_quantity_unit_id'
+        'default_quantity_unit_id',
+        'image_url'
     ];
 
     // Eager load the item's category by default
@@ -25,6 +27,19 @@ class Item extends Model
 
     // Omits the "category_id" from any collection of Items that is retrieved
     protected $hidden = ['category_id', 'default_quantity_unit_id', 'created_at', 'updated_at', 'user_id'];
+
+    // Accessor for "image_url" property of the recipe
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string | null $value) => $value ? Storage::url($value) : null,
+        );
+    }
+
+    // Returns the actual url stored in the DB (without the Minio url prepended, like what the "imageUrl" accessor returns). This is used for deleting the old image when it's been replaced. Access this as $item->short_image_url
+    protected function getShortImageUrlAttribute() {
+        return $this->attributes['image_url'];
+    }
 
     public function category()
     {

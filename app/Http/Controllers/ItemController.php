@@ -6,8 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\Item;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class ItemController extends Controller
 {
@@ -151,6 +154,83 @@ class ItemController extends Controller
 
         return [
             'message' => 'Items successfully assigned to category.'
+        ];
+    }
+
+    public function uploadImage(Request $request, Item $item) {
+        $request->validate([
+            // Size in kilobytes.
+            'item_image' => 'required|file|mimes:jpg,jpeg,png|max:8192'
+        ]);
+
+        $file = $request->file('item_image');
+        $mimeType = $file->getMimeType();
+        $extension = explode('/', $mimeType)[1];
+
+        $binaryFileData = $file->get();
+
+        // Call image processing service to optimize the image and give us back optimized binary image data
+        $response = Http::attach('file_to_optimize', $binaryFileData, 'file_to_optimize.' . $extension, [
+            "Content-Type" => $mimeType
+        ])->post(env('IMAGE_PROCESSING_SERVICE_URL') . '/optimize-image', [
+            'param3' => 'value6'
+        ]);
+
+        if (!$response->successful()) {
+            return response([
+                'errors' => ['Failed to upload image, ' . $response->body()]
+            ], 500);
+        }
+
+        // The binary data of the processed file we get back from the processing service
+        $processedBinaryFileData = $response->body();
+
+        $newFilePath = 'item-images/' . Str::random(40) . '.webp';
+        $uploadSuccessful = Storage::put($newFilePath, $processedBinaryFileData);
+        
+        if (!$uploadSuccessful) {
+            return response([
+                'errors' => ['Failed to upload image.']
+            ], 500);
+        }
+
+        // Once we've confirmed upload is successful, delete the old (now unused) image from storage, if one exists
+        $oldImagePath = $item->short_image_url;
+        if ($oldImagePath) {
+            // First check if any other items are using the same image. If so, don't delete it
+            $itemStillUsingImage = Item::where('image_url', $oldImagePath)->first();
+
+            if (!$itemStillUsingImage) {
+                Storage::delete($oldImagePath);
+            }
+        }
+
+        $item->image_url = $newFilePath;
+        $item->save();
+
+        return [
+            'message' => 'Item image successfully added.',
+            'data' => [
+                'url' => Storage::url($newFilePath),
+            ]
+        ];
+    }
+
+    public function removeImage(Item $item) {
+        $currentImagePath = $item->short_image_url;
+
+        // First check if any other items are using the same image. If so, don't delete it
+        $itemStillUsingImage = Item::where('image_url', $currentImagePath)->first();
+
+        if (!$itemStillUsingImage) {
+            Storage::delete($currentImagePath);
+        }
+
+        $item->image_url = null;
+        $item->save();
+
+        return [
+            'message' => 'Item image successfully removed.'
         ];
     }
 }
