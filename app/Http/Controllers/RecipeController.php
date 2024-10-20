@@ -377,7 +377,8 @@ class RecipeController extends Controller
             'name' => $validatedRequest['name'],
             'recipe_category_id' => null,
             'user_id' => $loggedInUserId,
-            'instructions' => $recipeToShare->instructions
+            'instructions' => $recipeToShare->instructions,
+            'image_url' => $recipeToShare->short_image_url
         ]);
 
         foreach ($recipeToShare->items as $recipeItemPivot) {
@@ -453,9 +454,14 @@ class RecipeController extends Controller
         }
 
         // Once we've confirmed upload is successful, delete the old (now unused) image from storage, if one exists
-        $oldImagePath = $recipe->shortImageUrl;
+        $oldImagePath = $recipe->short_image_url;
         if ($oldImagePath) {
-            Storage::delete($oldImagePath);
+            // First check if any other recipes are using the same image (eg. from shared recipes). If so, don't delete it
+            $recipeStillUsingImage = Recipe::where('image_url', $oldImagePath)->first();
+
+            if (!$recipeStillUsingImage) {
+                Storage::delete($oldImagePath);
+            }
         }
 
         $recipe->image_url = $newFilePath;
@@ -470,8 +476,14 @@ class RecipeController extends Controller
     }
 
     public function removeImage(Recipe $recipe) {
-        $currentImagePath = $recipe->shortImageUrl;
-        Storage::delete($currentImagePath);
+        $currentImagePath = $recipe->short_image_url;
+
+        // First check if any other recipes are using the same image (eg. from shared recipes). If so, don't delete it
+        $recipeStillUsingImage = Recipe::where('image_url', $currentImagePath)->first();
+
+        if (!$recipeStillUsingImage) {
+            Storage::delete($currentImagePath);
+        }
 
         $recipe->image_url = null;
         $recipe->save();
