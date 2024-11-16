@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Menu;
 use App\Models\Recipe;
+use App\Models\RecipeCategory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
@@ -139,6 +140,72 @@ class MenuController extends Controller
 
         return [
             'message' => 'Recipe successfully removed from menu.'
+        ];
+    }
+
+    public function randomRecipes(Request $request, Menu $menu)
+    {
+        $loggedInUserId = Auth::id();
+
+        $validatedRequest = Validator::make(
+            [
+                'recipe_categories' => $request['recipe_categories']
+            ],
+            [
+                'recipe_categories' => [
+                    'required',
+                    function ($attribute, $value, $fail) {
+                        foreach ($value as $item) {
+                            $recipeId = $item['id'];
+                            $quantity = $item['quantity'];
+
+                            // Recipe id has to be EITHER "ALL_CATEGORIES" OR a number greater than 0.
+                            if ($recipeId !== 'ALL_CATEGORIES' && (!is_numeric($recipeId) || $recipeId <= 0)) {
+                                $fail('Recipe categories must be either one of your existing categories, or "All Categories".');
+                            }
+
+                            // If it's a number, it has to be the id of a recipe category that belongs to the user
+                            if ($recipeId !== 'ALL_CATEGORIES') {
+                                $loggedInUserId = Auth::id();
+                                $foundRecipeCategoryBelongingToLoggedInUser = RecipeCategory::where('user_id', $loggedInUserId)->where('id', $recipeId)->get()->first();
+                                if (!$foundRecipeCategoryBelongingToLoggedInUser) {
+                                    $fail('Recipe categories must belong to you');
+                                }
+                            }
+
+                            if (!is_numeric($quantity) || $quantity <= 0) {
+                                $fail('Recipe categories must have a quantity of a number greater than 0');
+                            }
+                        }
+                    }
+                ],
+            ]
+        )->validate();
+
+        // Clear all existing recipes from menu
+        $menu->recipes()->detach();
+
+        // Generate random recipes according to request and attach to menu
+        $recipeCategories = $validatedRequest['recipe_categories'];
+        foreach ($recipeCategories as $category) {
+            $id = $category['id'];
+            $quantity = $category['quantity'];
+
+            $randomRecipesFromCategory = [];
+
+            if ($id === 'ALL_CATEGORIES') {
+                $randomRecipesFromCategory = Recipe::where('user_id', $loggedInUserId)->inRandomOrder()->take($quantity)->get();
+            } else {
+                $randomRecipesFromCategory = Recipe::where('recipe_category_id', $id)->inRandomOrder()->take($quantity)->get();
+            }
+
+            foreach ($randomRecipesFromCategory as $randomRecipeCategory) {
+                $menu->recipes()->attach($randomRecipeCategory->id);
+            }
+        }
+
+        return [
+            'message' => 'Successfully generated random recipes and added them to the menu.'
         ];
     }
 }

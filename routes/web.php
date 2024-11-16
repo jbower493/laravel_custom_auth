@@ -37,9 +37,6 @@ Route::post('/api/forgot-password', [AuthController::class, 'forgotPassword'])->
 Route::post('/api/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
 // Account
-/**
- * TODO: need send invite to add additional user, not just add it, but for now I will just add so I can get the feature working
- */
 Route::get('/api/user/additional-user', [AccountController::class, 'index'])->middleware('auth:web');
 Route::post('/api/user/additional-user', [AccountController::class, 'store'])->middleware('auth:web');
 Route::post('/api/user/additional-user/remove', [AccountController::class, 'remove'])->middleware('auth:web');
@@ -110,6 +107,9 @@ Route::put('/api/menu/{menu}/update-menu-recipe/{recipe}', [MenuController::clas
     ->middleware('can:update,menu')
     ->middleware('can:update,recipe');
 Route::post('/api/menu/{menu}/remove-recipe', [MenuController::class, 'removeRecipe'])
+    ->middleware('auth:web')
+    ->middleware('can:update,menu');
+Route::put('/api/menu/{menu}/random-recipes', [MenuController::class, 'randomRecipes'])
     ->middleware('auth:web')
     ->middleware('can:update,menu');
 
