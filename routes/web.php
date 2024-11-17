@@ -10,7 +10,9 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\QuantityUnitsController;
 use App\Http\Controllers\RecipeCategoryController;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Socialite\Facades\Socialite;
 
 // use App\Mail\Welcome;
 // use Illuminate\Support\Facades\Mail;
@@ -35,6 +37,10 @@ Route::post('/api/register', [AuthController::class, 'register']);
 Route::get('/api/logout', [AuthController::class, 'logout'])->middleware('auth:web');
 Route::post('/api/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
 Route::post('/api/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+// SSO
+Route::get('/auth/google/redirect', [App\Http\Controllers\GoogleLoginController::class, 'redirectToGoogle'])->name('auth.google.redirect');
+Route::get('/auth/google/callback', [App\Http\Controllers\GoogleLoginController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 // Account
 Route::get('/api/user/additional-user', [AccountController::class, 'index'])->middleware('auth:web');
