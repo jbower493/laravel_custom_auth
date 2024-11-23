@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class GoogleLoginController extends Controller
 {
@@ -28,12 +29,14 @@ class GoogleLoginController extends Controller
                 'name' => $name,
                 'email' => $email,
                 // TODO: remove password login all together, including removing the column from the db
-                'password' => 'asdfasdfasdfasdf98274%&*#*$'
+                'password' => Str::random(20)
             ]);
         }
 
         Auth::login($user);
 
-        return redirect("http://localhost:3000");
+        $redirectUrl = config('app.env') === 'production' ? 'https://shoppinglist.jamiebowerdev.com' : 'http://localhost:3000';
+
+        return redirect($redirectUrl);
     }
 }
