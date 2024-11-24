@@ -104,10 +104,9 @@ Route::post('/api/menu', [MenuController::class, 'store'])->middleware('auth:web
 Route::put('/api/menu/{menu}', [MenuController::class, 'update'])->middleware('auth:web')->middleware('can:update,menu');
 Route::delete('/api/menu/{menu}', [MenuController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,menu');
 Route::get('/api/menu/{menu}', [MenuController::class, 'singleMenu'])->middleware('auth:web')->middleware('can:view,menu');
-Route::post('/api/menu/{menu}/add-recipe/{recipe}', [MenuController::class, 'addRecipe'])
+Route::post('/api/menu/{menu}/add-recipes', [MenuController::class, 'addRecipes'])
     ->middleware('auth:web')
-    ->middleware('can:update,menu')
-    ->middleware('can:update,recipe');
+    ->middleware('can:update,menu');
 Route::put('/api/menu/{menu}/update-menu-recipe/{recipe}', [MenuController::class, 'updateMenuRecipe'])
     ->middleware('auth:web')
     ->middleware('can:update,menu')
@@ -115,7 +114,7 @@ Route::put('/api/menu/{menu}/update-menu-recipe/{recipe}', [MenuController::clas
 Route::post('/api/menu/{menu}/remove-recipe', [MenuController::class, 'removeRecipe'])
     ->middleware('auth:web')
     ->middleware('can:update,menu');
-Route::put('/api/menu/{menu}/random-recipes', [MenuController::class, 'randomRecipes'])
+Route::put('/api/menu/{menu}/random-recipes/preview', [MenuController::class, 'randomRecipesPreview'])
     ->middleware('auth:web')
     ->middleware('can:update,menu');
 

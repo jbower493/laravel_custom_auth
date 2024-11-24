@@ -90,23 +90,45 @@ class MenuController extends Controller
         ];
     }
 
-    public function addRecipe(Request $request, Menu $menu, Recipe $recipe)
+    public function addRecipes(Request $request, Menu $menu)
     {
         $validatedRequest = Validator::make(
             [
-                'day' => $request['day']
+                'recipes' => $request['recipes']
             ],
             [
-                'day' => 'nullable|date_format:Y-m-d',
+                'recipes' => [
+                    'required',
+                    function ($attribute, $value, $fail) {
+                        $loggedInUserId = Auth::id();
+
+                        foreach ($value as $singleRecipe) {
+                            $recipeId = $singleRecipe['id'];
+                            $day = $singleRecipe['day'];
+
+                            Validator::make(['day' => $day], ['day' => 'nullable|date_format:Y-m-d'])->validate();
+
+                            $foundRecipe = Recipe::where('user_id', $loggedInUserId)->where('id', $recipeId)->get()->first();
+
+                            if (!$foundRecipe) {
+                                $fail('All recipes to add to a menu must belong to the menu owner.');
+                            }
+                        }
+                    }
+                ],
             ]
         )->validate();
 
-        $date = $validatedRequest['day'] ? Carbon::createFromFormat('Y-m-d', $validatedRequest['day']) : null;
+        foreach ($validatedRequest['recipes'] as $recipeToAdd) {
+            $date = $recipeToAdd['day'] ? Carbon::createFromFormat('Y-m-d', $recipeToAdd['day']) : null;
 
-        $menu->recipes()->attach($recipe->id, ['day' => $date]);
+            $menu->recipes()->attach($recipeToAdd['id'], ['day' => $date]);
+        }
+
+        $pluralized = count($validatedRequest['recipes']) === 1 ? 'Recipe' : 'Recipes';
 
         return [
-            'message' => 'Recipe successfully added to menu.'
+            'message' => $pluralized . ' successfully added to menu.'
         ];
     }
 
@@ -143,7 +165,7 @@ class MenuController extends Controller
         ];
     }
 
-    public function randomRecipes(Request $request, Menu $menu)
+    public function randomRecipesPreview(Request $request, Menu $menu)
     {
         $loggedInUserId = Auth::id();
 
@@ -182,10 +204,9 @@ class MenuController extends Controller
             ]
         )->validate();
 
-        // Clear all existing recipes from menu
-        $menu->recipes()->detach();
+        // Generate random recipes according to request
+        $recipes = [];
 
-        // Generate random recipes according to request and attach to menu
         $recipeCategories = $validatedRequest['recipe_categories'];
         foreach ($recipeCategories as $category) {
             $id = $category['id'];
@@ -199,13 +220,16 @@ class MenuController extends Controller
                 $randomRecipesFromCategory = Recipe::where('recipe_category_id', $id)->inRandomOrder()->take($quantity)->get();
             }
 
-            foreach ($randomRecipesFromCategory as $randomRecipeCategory) {
-                $menu->recipes()->attach($randomRecipeCategory->id);
+            foreach ($randomRecipesFromCategory as $randomRecipe) {
+                array_push($recipes, $randomRecipe);
             }
         }
 
         return [
-            'message' => 'Successfully generated random recipes and added them to the menu.'
+            'message' => 'Successfully generated random recipes and added them to the menu.',
+            'data' => [
+                "recipes" => $recipes
+            ]
         ];
     }
 }
