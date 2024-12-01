@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\SharedRecipe;
+use App\Models\ImportedRecipe;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -416,7 +417,8 @@ class RecipeController extends Controller
         ];
     }
 
-    public function uploadImage(Request $request, Recipe $recipe) {
+    public function uploadImage(Request $request, Recipe $recipe)
+    {
         $request->validate([
             // Size in kilobytes.
             'recipe_image' => 'required|file|mimes:jpg,jpeg,png|max:8192'
@@ -446,7 +448,7 @@ class RecipeController extends Controller
 
         $newFilePath = 'recipe-images/' . Str::random(40) . '.webp';
         $uploadSuccessful = Storage::put($newFilePath, $processedBinaryFileData);
-        
+
         if (!$uploadSuccessful) {
             return response([
                 'errors' => ['Failed to upload image.']
@@ -475,7 +477,8 @@ class RecipeController extends Controller
         ];
     }
 
-    public function removeImage(Recipe $recipe) {
+    public function removeImage(Recipe $recipe)
+    {
         $currentImagePath = $recipe->short_image_url;
 
         // First check if any other recipes are using the same image (eg. from shared recipes). If so, don't delete it
@@ -490,6 +493,127 @@ class RecipeController extends Controller
 
         return [
             'message' => 'Recipe image successfully removed.'
+        ];
+    }
+
+    public function importFromChromeExtension(Request $request)
+    {
+        $user = User::where('email', $request['email'])->first();
+
+        if (!$user) {
+            return response([
+                'errors' => ['User with that email does not exist.']
+            ], 400);
+        }
+
+        $validatedRequest = Validator::make(
+            [
+                'name' => $request['recipe']['name'],
+                'instructions' => $request['recipe']['instructions'],
+                'recipe_category' => $request['recipe']['recipe_category'] ?? null,
+                'prep_time' => $request['recipe']['prep_time'],
+                'serves' => $request['recipe']['serves'],
+                'items' => $request['recipe']['items']
+            ],
+            [
+                'name' => ['required'],
+                'instructions' => ['string', 'nullable'],
+                'recipe_category' => ['nullable', 'integer'],
+                'prep_time' => ['nullable', 'integer'],
+                'serves' => ['nullable', 'integer'],
+                'items' => ['required', 'array'],
+                'items.*.name' => ['required', 'string'],
+                'items.*.quantity' => ['required', 'numeric'],
+                'items.*.quantity_unit' => ['nullable', 'string']
+            ]
+        )->validate();
+
+        ImportedRecipe::create([
+            'user_id' => $user->id,
+            'data' => json_encode($validatedRequest)
+        ]);
+
+        return [
+            'message' => 'Recipe successfully imported.'
+        ];
+    }
+
+    public function confirmImportFromChromeExtension(Request $request, ImportedRecipe $importedRecipe)
+    {
+        $loggedInUserId = Auth::id();
+
+        $validatedRequest = Validator::make(
+            [
+                'name' => $request['name'],
+                'instructions' => $request['instructions'],
+                'recipe_category_id' => $request['recipe_category_id'] ?? null,
+                'prep_time' => $request['prep_time'],
+                'serves' => $request['serves'],
+                'items' => $request['items']
+            ],
+            // Same as new recipe validator, except this one includes items list
+            [
+                'name' => ['required'],
+                'instructions' => ['string', 'nullable'],
+                'recipe_category_id' => ['nullable', 'integer'],
+                'prep_time' => ['nullable', 'integer'],
+                'serves' => ['nullable', 'integer'],
+                'items' => ['required', 'array'],
+                'items.*.name' => ['required', 'string'],
+                'items.*.quantity' => ['required', 'integer'],
+                'items.*.quantity_unit_id' => ['nullable', 'integer'],
+                'items.*.category_id' => ['nullable', 'integer']
+            ]
+        )->validate();
+
+        $recipe = Recipe::create([
+            'name' => $validatedRequest['name'],
+            'recipe_category_id' => $validatedRequest['recipe_category_id'],
+            'instructions' => $validatedRequest['instructions'] ?? '',
+            'user_id' => $loggedInUserId,
+            'prep_time' => $validatedRequest['prep_time'],
+            'serves' => $validatedRequest['serves']
+        ]);
+
+        foreach ($validatedRequest['items'] as $itemToAdd) {
+            $name = $itemToAdd['name'];
+            $quantity = $itemToAdd['quantity'];
+            $quantityUnitId = $itemToAdd['quantity_unit_id'];
+
+            $existingItem = Item::where('name', $name)->where('user_id', $loggedInUserId)->first();
+
+            $pivotvalues = [
+                'quantity' => $quantity,
+                "quantity_unit_id" => $quantityUnitId
+            ];
+
+            if ($existingItem) {
+                $recipe->items()->attach($existingItem->id, $pivotvalues);
+                continue;
+            }
+
+            // Item doesn't already exist
+            $item = Item::create([
+                'name' => $name,
+                'user_id' => $loggedInUserId,
+                'category_id' => $itemToAdd['category_id'],
+                'default_quantity_unit_id' => $quantityUnitId
+            ]);
+
+            $item->save();
+
+            $recipe->items()->attach($item['id'], $pivotvalues);
+        }
+
+        $recipe->save();
+
+        $importedRecipe->delete();
+
+        return [
+            'message' => 'Recipe import successfully confirmed.',
+            'data' => [
+                'new_recipe_id' => $recipe->id
+            ]
         ];
     }
 }

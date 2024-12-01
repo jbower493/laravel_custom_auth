@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AdditionalUser;
+use App\Models\ImportedRecipe;
 use App\Models\RecipeShareRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -207,22 +208,38 @@ class AccountController extends Controller
         $loggedInUserId = Auth::id();
         $loggedInUser = User::find($loggedInUserId);
 
-        // For now, the only notifications we have are recipe share request so we'll just list them.
-
+        // Share requests
         $recipeShareRequestsCollection = RecipeShareRequest::where('recipient_email', $loggedInUser->email)->get();
 
-        $ShareRequests = $recipeShareRequestsCollection->map(function ($recipeShareRequest) {
+        $shareRequests = $recipeShareRequestsCollection->map(function ($recipeShareRequest) {
             return [
-                'share_request_id' => $recipeShareRequest->id,
-                'owner_name' => $recipeShareRequest->owner->name,
-                'recipe_name' => $recipeShareRequest->recipe->name
+                "type" => "share_request",
+                "meta" => [
+                    'share_request_id' => $recipeShareRequest->id,
+                    'owner_name' => $recipeShareRequest->owner->name,
+                    'recipe_name' => $recipeShareRequest->recipe->name
+                ]
             ];
         })->toArray();
+
+        // Imported recipes
+        $importedRecipesCollection = ImportedRecipe::where('user_id', $loggedInUserId)->get();
+        $importedRecipes = $importedRecipesCollection->map(function ($importedRecipe) {
+            return [
+                "type" => "imported_recipe",
+                "meta" => [
+                    'imported_recipe_id' => $importedRecipe->id,
+                    'recipe' => json_decode($importedRecipe->data)
+                ]
+            ];
+        })->toArray();
+
+        $notifications = array_merge($shareRequests, $importedRecipes);
 
         return [
             'message' => 'Successfully fetched notifications.',
             'data' => [
-                "notifications" => $ShareRequests
+                "notifications" => $notifications
             ]
         ];
     }

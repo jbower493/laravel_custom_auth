@@ -10,9 +10,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\QuantityUnitsController;
 use App\Http\Controllers\RecipeCategoryController;
-use App\Models\User;
-use Illuminate\Support\Facades\Storage;
-use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Log;
 
 // use App\Mail\Welcome;
 // use Illuminate\Support\Facades\Mail;
@@ -97,6 +95,10 @@ Route::post('/api/recipe/{recipe}/create-share-request', [RecipeController::clas
 Route::post('/api/recipe/accept-share-request/{recipeShareRequest}', [RecipeController::class, 'acceptShareRequest'])->middleware('auth:web');
 Route::post('/api/recipe/{recipe}/upload-image', [RecipeController::class, 'uploadImage'])->middleware('auth:web')->middleware('can:update,recipe');
 Route::delete('/api/recipe/{recipe}/remove-image', [RecipeController::class, 'removeImage'])->middleware('auth:web')->middleware('can:update,recipe');
+
+Route::post('/api/recipe/import-from-chrome-extension', [RecipeController::class, 'importFromChromeExtension']);
+Route::post('/api/recipe/confirm-import-from-chrome-extension/{importedRecipe}', [RecipeController::class, 'confirmImportFromChromeExtension'])->middleware('auth:web')->middleware('can:delete,importedRecipe');
+
 
 // Menu
 Route::get('/api/menu', [MenuController::class, 'index'])->middleware('auth:web');
