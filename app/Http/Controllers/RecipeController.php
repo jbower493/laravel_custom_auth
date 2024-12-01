@@ -560,7 +560,7 @@ class RecipeController extends Controller
                 'serves' => ['nullable', 'integer'],
                 'items' => ['required', 'array'],
                 'items.*.name' => ['required', 'string'],
-                'items.*.quantity' => ['required', 'integer'],
+                'items.*.quantity' => ['required', 'numeric'],
                 'items.*.quantity_unit_id' => ['nullable', 'integer'],
                 'items.*.category_id' => ['nullable', 'integer']
             ]
