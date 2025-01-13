@@ -18,13 +18,11 @@ class AuthController extends Controller
         return '';
     }
 
-    public function getUser()
+    public function getUser(Request $request)
     {
-        $user = Auth::user();
+        $session = $request->attributes->get('custom_session');
 
-        // If the current session is an additional user logged into someone else's account
-        $additionalUserId = Session::get('additional_user_id');
-        $additionalUser = User::find($additionalUserId);
+        $user = User::find($session->user_id);
 
         if (!$user) return response([
             'errors' => ['No user is currently logged in.']
@@ -34,10 +32,7 @@ class AuthController extends Controller
             'message' => 'Successfully retreived user.',
             'data' => [
                 'user' => $user,
-                "additional_user" => $additionalUser ? [
-                    "email" => $additionalUser->email,
-                    "name" => $additionalUser->name
-                ] : null
+                "additional_user" => null
             ]
         ];
     }
@@ -50,8 +45,6 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
-            Session::remove('additional_user_id');
-            $request->session()->regenerate();
 
             return [
                 'message' => 'Login successful.'
