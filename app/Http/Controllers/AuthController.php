@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Repositories\AuthedUserRepositoryInterface;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
@@ -13,25 +14,30 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    public function getCsrfToken(Request $request)
+    protected $authedUserRepo;
+
+    public function __construct(AuthedUserRepositoryInterface $authedUserRepo)
+    {
+        $this->authedUserRepo = $authedUserRepo;
+    }
+
+    public function getCsrfToken()
     {
         return '';
     }
 
-    public function getUser(Request $request)
+    public function getUser()
     {
-        $session = $request->attributes->get('custom_session');
+        $loggedInUser = $this->authedUserRepo->getUser();
 
-        $user = User::find($session->user_id);
-
-        if (!$user) return response([
+        if (!$loggedInUser) return response([
             'errors' => ['No user is currently logged in.']
         ], 401);
 
         return [
             'message' => 'Successfully retreived user.',
             'data' => [
-                'user' => $user,
+                'user' => $loggedInUser,
                 "additional_user" => null
             ]
         ];

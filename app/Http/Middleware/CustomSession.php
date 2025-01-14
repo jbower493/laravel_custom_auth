@@ -25,7 +25,9 @@ class CustomSession
 
         if ($token) {
             $session = $this->retrieveSessionByToken($token);
-        } else {
+        }
+
+        if (!$session) {
             $session = $this->getNewSession();
         }
 

@@ -8,21 +8,29 @@ use App\Models\Recipe;
 use App\Models\Item;
 use App\Models\Menu;
 use App\Models\QuantityUnit;
+use App\Repositories\AuthedUserRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ListController extends Controller
 {
+    protected $authedUserRepo;
+
+    public function __construct(AuthedUserRepositoryInterface $authedUserRepo)
+    {
+        $this->authedUserRepo = $authedUserRepo;
+    }
+
     public function index()
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUser = $this->authedUserRepo->getUser();
 
-        $lists = ShoppingList::where('user_id', $loggedInUserId)->orderBy('created_at', 'desc')->get()->toArray();
+        $lists = ShoppingList::where('user_id', $loggedInUser->id)->orderBy('created_at', 'desc')->get()->toArray();
 
         return [
             'message' => 'Successfully retreived lists.',
             'data' => [
-                'lists' => $lists
+                'lists' => $lists,
             ]
         ];
     }

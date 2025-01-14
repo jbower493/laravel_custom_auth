@@ -63,7 +63,8 @@ Route::post('/api/item/{item}/upload-image', [ItemController::class, 'uploadImag
 Route::delete('/api/item/{item}/remove-image', [ItemController::class, 'removeImage'])->middleware('auth:web')->middleware('can:update,item');
 
 // Lists
-Route::get('/api/list', [ListController::class, 'index'])->middleware('auth:web');
+// Route::get('/api/list', [ListController::class, 'index'])->middleware('auth:web');
+Route::get('/api/list', [ListController::class, 'index']);
 Route::post('/api/list', [ListController::class, 'store'])->middleware('auth:web');
 Route::put('/api/list/{list}', [ListController::class, 'update'])->middleware('auth:web')->middleware('can:update,list');
 Route::delete('/api/list/{list}', [ListController::class, 'delete'])->middleware('auth:web')->middleware('can:delete,list');
