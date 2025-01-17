@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('custom_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users');
+            $table->integer('type');
             $table->timestamps();
         });
     }

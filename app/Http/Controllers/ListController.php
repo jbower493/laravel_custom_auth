@@ -37,7 +37,7 @@ class ListController extends Controller
 
     public function store(Request $request)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validatedList = $request->validate([
             'name' => ['required']

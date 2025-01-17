@@ -9,12 +9,12 @@ class AuthedUserRepository implements AuthedUserRepositoryInterface
 {
     public function getUser()
     {
-        $session = request()->attributes->get('custom_session');
+        $user = request()->attributes->get('logged_in_user');
 
-        if (!$session) {
+        if (!$user) {
             return null;
         }
 
-        return User::find($session->user_id) ?? null;
+        return $user;
     }
 }

@@ -9,7 +9,11 @@ class CustomSession extends Model
 {
     use HasFactory;
 
+    const SESSION_TYPE_APP = 0;
+    const SESSION_TYPE_WEB = 1;
+
     protected $fillable = [
-        'user_id'
+        'user_id',
+        'type'
     ];
 }

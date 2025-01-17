@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\SessionTokenTrait;
+use App\Models\CustomSession as CustomSessionModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +16,8 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    use SessionTokenTrait;
+
     protected $authedUserRepo;
 
     public function __construct(AuthedUserRepositoryInterface $authedUserRepo)
@@ -29,10 +33,6 @@ class AuthController extends Controller
     public function getUser()
     {
         $loggedInUser = $this->authedUserRepo->getUser();
-
-        if (!$loggedInUser) return response([
-            'errors' => ['No user is currently logged in.']
-        ], 401);
 
         return [
             'message' => 'Successfully retreived user.',
@@ -51,10 +51,24 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
+            $user = User::where('email', $credentials['email'])->first();
+            $sessionType = $this->checkIsFromMobileApp($request) ? CustomSessionModel::SESSION_TYPE_APP : CustomSessionModel::SESSION_TYPE_WEB;
+            $newSession = $this->createNewSession($user->id, $sessionType);
 
-            return [
+            if ($sessionType === CustomSessionModel::SESSION_TYPE_APP) {
+                return [
+                    'message' => 'Login successful.',
+                    'token' => $newSession->id
+                ];
+            }
+
+            $response = response([
                 'message' => 'Login successful.'
-            ];
+            ]);
+
+            $this->attachSessionCookieToResponse($newSession, $response);
+
+            return $response;
         }
 
         return response([
