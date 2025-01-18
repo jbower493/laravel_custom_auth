@@ -14,6 +14,7 @@ class CustomSession extends Model
 
     protected $fillable = [
         'user_id',
-        'type'
+        'type',
+        'additional_user_id'
     ];
 }

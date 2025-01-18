@@ -30,15 +30,22 @@ class AuthController extends Controller
         return '';
     }
 
-    public function getUser()
+    public function getUser(Request $request)
     {
         $loggedInUser = $this->authedUserRepo->getUser();
+
+        // If the current session is an additional user logged into someone else's account
+        $additionalUserId = $request->attributes->get('custom_session')->additional_user_id;
+        $additionalUser = User::find($additionalUserId);
 
         return [
             'message' => 'Successfully retreived user.',
             'data' => [
                 'user' => $loggedInUser,
-                "additional_user" => null
+                "additional_user" => $additionalUser ? [
+                    "email" => $additionalUser->email,
+                    "name" => $additionalUser->name
+                ] : null
             ]
         ];
     }
@@ -52,10 +59,9 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = User::where('email', $credentials['email'])->first();
-            $sessionType = $this->checkIsFromMobileApp($request) ? CustomSessionModel::SESSION_TYPE_APP : CustomSessionModel::SESSION_TYPE_WEB;
-            $newSession = $this->createNewSession($user->id, $sessionType);
+            $newSession = $this->createNewSession($user->id);
 
-            if ($sessionType === CustomSessionModel::SESSION_TYPE_APP) {
+            if ($newSession->type === CustomSessionModel::SESSION_TYPE_APP) {
                 return [
                     'message' => 'Login successful.',
                     'token' => $newSession->id

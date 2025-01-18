@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->integer('type');
+            $table->foreignId('additional_user_id')->nullable()->constrained('users');
             $table->timestamps();
         });
     }

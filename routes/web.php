@@ -39,6 +39,7 @@ Route::post('/api/reset-password', [AuthController::class, 'resetPassword'])->na
 Route::get('/auth/google/redirect', [App\Http\Controllers\GoogleLoginController::class, 'redirectToGoogle'])->name('auth.google.redirect');
 Route::get('/auth/google/callback', [App\Http\Controllers\GoogleLoginController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
+// TODO: all these routes are accessible by someone logged into the account as an additional user. Make a policy to prevent that.
 // Account
 Route::get('/api/user/additional-user', [AccountController::class, 'index'])->middleware('checkAuthed:web');
 Route::post('/api/user/additional-user', [AccountController::class, 'store'])->middleware('checkAuthed:web');

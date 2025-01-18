@@ -3,22 +3,32 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\AdditionalUser;
+use App\Models\CustomSession as CustomSessionModel;
 use App\Models\ImportedRecipe;
 use App\Models\RecipeShareRequest;
 use App\Models\User;
+use App\Repositories\AuthedUserRepositoryInterface;
+use App\Traits\SessionTokenTrait;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
 
 class AccountController extends Controller
 {
+    use SessionTokenTrait;
+
+    protected $authedUserRepo;
+
+    public function __construct(AuthedUserRepositoryInterface $authedUserRepo)
+    {
+        $this->authedUserRepo = $authedUserRepo;
+    }
+
     /**
      * List all the users that have additional user access to this account
      */
     public function index()
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         // TODO: speed up this query by doing it all in SQL instead of looping over and then querying in each iteration
 
@@ -42,7 +52,7 @@ class AccountController extends Controller
 
     public function store(Request $request)
     {
-        $loggedInUser = Auth::user();
+        $loggedInUser = $this->authedUserRepo->getUser();
 
         $validatedRequest = $request->validate([
             'additional_user_email' => ['required', 'exists:users,email']
@@ -68,7 +78,7 @@ class AccountController extends Controller
 
     public function remove(Request $request)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validatedRequest = $request->validate([
             'additional_user_email' => ['required', 'exists:users,email']
@@ -99,7 +109,7 @@ class AccountController extends Controller
      */
     public function accountAccess()
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         // TODO: speed up this query by doing it all in SQL instead of looping over and then querying in each iteration
 
@@ -123,7 +133,7 @@ class AccountController extends Controller
 
     public function loginAsAnotherUser(Request $request)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validatedRequest = $request->validate([
             'user_email_to_login_as' => ['required', 'exists:users,email']
@@ -142,13 +152,22 @@ class AccountController extends Controller
             ], 400);
         }
 
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // Logout current user from their own account
+        $this->authedUserRepo->logout();
 
-        Auth::loginUsingId($userToLoginAs->id);
+        // Log them into the other person's account
+        $newSession = $this->createNewSession($userToLoginAs->id);
 
-        Session::put('additional_user_id', $loggedInUserId);
+        // session['additional_user_id'] is the id of the original user that was logged in, and is now managing services for another user.
+        $newSession->additional_user_id = $loggedInUserId;
+        $newSession->save();
+
+        if ($newSession->type === CustomSessionModel::SESSION_TYPE_APP) {
+            return [
+                'message' => 'Successfully logged into account as additional user.',
+                'token' => $newSession->id
+            ];
+        }
 
         return [
             'message' => 'Successfully logged into account as additional user.'
@@ -157,7 +176,7 @@ class AccountController extends Controller
 
     public function changeEmail(Request $request)
     {
-        $loggedInUser = Auth::user();
+        $loggedInUser = $this->authedUserRepo->getUser();
 
         // TODO: This presents a security risk, telling the user if an email address has already been taken. Eventually change it to send them an email and make them confirm
         $validatedRequest = $request->validate([
@@ -174,7 +193,7 @@ class AccountController extends Controller
 
     public function changePassword(Request $request)
     {
-        $loggedInUser = Auth::user();
+        $loggedInUser = $this->authedUserRepo->getUser();
 
         $validatedRequest = $request->validate([
             "new_password" => ['required', 'string'],
@@ -190,13 +209,11 @@ class AccountController extends Controller
         ];
     }
 
-    public function deleteAccount(Request $request, User $user)
+    public function deleteAccount(User $user)
     {
-        $user->delete();
+        $this->authedUserRepo->logout();
 
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $user->delete();
 
         return [
             'message' => 'Account successfully deleted.'
@@ -205,8 +222,7 @@ class AccountController extends Controller
 
     public function notifications()
     {
-        $loggedInUserId = Auth::id();
-        $loggedInUser = User::find($loggedInUserId);
+        $loggedInUser = $this->authedUserRepo->getUser();
 
         // Share requests
         $recipeShareRequestsCollection = RecipeShareRequest::where('recipient_email', $loggedInUser->email)->get();
@@ -223,7 +239,7 @@ class AccountController extends Controller
         })->toArray();
 
         // Imported recipes
-        $importedRecipesCollection = ImportedRecipe::where('user_id', $loggedInUserId)->get();
+        $importedRecipesCollection = ImportedRecipe::where('user_id', $loggedInUser->id)->get();
         $importedRecipes = $importedRecipesCollection->map(function ($importedRecipe) {
             return [
                 "type" => "imported_recipe",

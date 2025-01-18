@@ -12,4 +12,11 @@ interface AuthedUserRepositoryInterface
      * @return User | null
      */
     public function getUser();
+
+    /**
+     * Log the current user out (by deleting their session).
+     *
+     * @return void
+     */
+    public function logout();
 }

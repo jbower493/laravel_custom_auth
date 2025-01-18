@@ -6,7 +6,6 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\CustomSession as CustomSessionModel;
-use ErrorException;
 
 trait SessionTokenTrait
 {
@@ -17,11 +16,9 @@ trait SessionTokenTrait
         return $existingSession;
     }
 
-    public function createNewSession($userId = null, $sessionType)
+    public function createNewSession($userId = null)
     {
-        if ($sessionType !== CustomSessionModel::SESSION_TYPE_APP && $sessionType !== CustomSessionModel::SESSION_TYPE_WEB) {
-            throw new ErrorException('Invalid session type, must be app or web.');
-        }
+        $sessionType = $this->checkIsFromMobileApp(request()) ? CustomSessionModel::SESSION_TYPE_APP : CustomSessionModel::SESSION_TYPE_WEB;
 
         $newSession = CustomSessionModel::create([
             'user_id' => $userId,
@@ -60,5 +57,16 @@ trait SessionTokenTrait
         $customHeader = $request->headers->get('Shopping-List-Mobile-App');
 
         return $customHeader ? true : false;
+    }
+
+    public function deleteCurrentSession()
+    {
+        $currentSession = request()->attributes->get('custom_session');
+
+        if (!$currentSession) {
+            return;
+        }
+
+        $currentSession->delete();
     }
 }
