@@ -121,7 +121,7 @@ class ListController extends Controller
             'quantity_unit_id' => $validatedNewItem['quantity_unit_id']
         ];
 
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $existingItem = Item::where('name', $validatedNewItem['name'])->where('user_id', $loggedInUserId)->first();
 

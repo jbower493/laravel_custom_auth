@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\Category;
 use App\Models\Item;
+use App\Repositories\AuthedUserRepositoryInterface;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    protected $authedUserRepo;
+
+    public function __construct(AuthedUserRepositoryInterface $authedUserRepo)
+    {
+        $this->authedUserRepo = $authedUserRepo;
+    }
+
     public function index()
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $categories = Category::where('user_id', $loggedInUserId)->orderBy('name')->get()->toArray();
 
@@ -25,7 +32,7 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validatedCategory = $request->validate([
             'name' => ['required']

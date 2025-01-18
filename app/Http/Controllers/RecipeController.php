@@ -8,10 +8,10 @@ use App\Models\Item;
 use App\Models\QuantityUnit;
 use App\Models\RecipeShareRequest;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\SharedRecipe;
 use App\Models\ImportedRecipe;
+use App\Repositories\AuthedUserRepositoryInterface;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -19,9 +19,16 @@ use Illuminate\Support\Str;
 
 class RecipeController extends Controller
 {
+    protected $authedUserRepo;
+
+    public function __construct(AuthedUserRepositoryInterface $authedUserRepo)
+    {
+        $this->authedUserRepo = $authedUserRepo;
+    }
+
     public function index()
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $recipes = Recipe::where('user_id', $loggedInUserId)->orderBy('name')->get()->toArray();
 
@@ -35,7 +42,7 @@ class RecipeController extends Controller
 
     public function store(Request $request)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validatedRecipe = Validator::make(
             [
@@ -197,7 +204,7 @@ class RecipeController extends Controller
             'quantity_unit_id' => $validatedNewItem['quantity_unit_id']
         ];
 
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $currentRecipeItems = $recipe->items();
 
@@ -287,7 +294,7 @@ class RecipeController extends Controller
             "name" => 'required'
         ]);
 
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $existingRecipeWithSameName = Recipe::where('name', $validatedRequest)->where('user_id', $loggedInUserId)->first();
 
@@ -331,7 +338,7 @@ class RecipeController extends Controller
             'email' => ['required', 'string', 'email']
         ]);
 
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
         $loggedInUser = User::find($loggedInUserId);
 
         $newShareRequest = RecipeShareRequest::create([
@@ -351,7 +358,7 @@ class RecipeController extends Controller
 
     public function acceptShareRequest(Request $request, RecipeShareRequest $recipeShareRequest)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
         $loggedInUser = User::find($loggedInUserId);
 
         if ($recipeShareRequest->recipient_email !== $loggedInUser->email) {
@@ -540,7 +547,7 @@ class RecipeController extends Controller
 
     public function confirmImportFromChromeExtension(Request $request, ImportedRecipe $importedRecipe)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validatedRequest = Validator::make(
             [

@@ -28,15 +28,15 @@ trait SessionTokenTrait
         return $newSession;
     }
 
-    public function attachSessionCookieToResponse(CustomSessionModel $session, Response $response)
+    public function getSessionCookie(CustomSessionModel $session)
     {
         if (!$session) {
-            return;
+            return null;
         }
 
         $sessionConfig = config('session');
 
-        $response->headers->setCookie(new Cookie(
+        return new Cookie(
             // $session->getName(),
             'custom_session',
             // $$newSession->getId(),
@@ -49,7 +49,18 @@ trait SessionTokenTrait
             $sessionConfig['http_only'] ?? true,
             false,
             $sessionConfig['same_site'] ?? null
-        ));
+        );
+    }
+
+    public function attachSessionCookieToResponse(CustomSessionModel $session, Response $response)
+    {
+        if (!$session) {
+            return;
+        }
+
+        $cookie = $this->getSessionCookie($session);
+
+        $response->headers->setCookie($cookie);
     }
 
     public function checkIsFromMobileApp(Request $request)

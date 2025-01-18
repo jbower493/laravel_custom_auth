@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomSession as CustomSessionModel;
 use App\Models\User;
+use App\Traits\SessionTokenTrait;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class GoogleLoginController extends Controller
 {
+    use SessionTokenTrait;
+
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
-
 
     public function handleGoogleCallback()
     {
-        $googleUser = Socialite::driver('google')->user();
+        $googleUser = Socialite::driver('google')->stateless()->user();
 
         $name = $googleUser->getName();
         $email = $googleUser->getEmail();
@@ -33,10 +35,15 @@ class GoogleLoginController extends Controller
             ]);
         }
 
-        Auth::login($user);
+        $newSession = $this->createNewSession($user->id);
 
         $redirectUrl = config('app.env') === 'production' ? 'https://shoppinglist.jamiebowerdev.com' : 'http://localhost:3000';
 
-        return redirect($redirectUrl);
+        if ($newSession->type === CustomSessionModel::SESSION_TYPE_APP) {
+            // TODO: still need to properly implement Google login on the app
+            return redirect($redirectUrl . '?token=' . $newSession->id);
+        }
+
+        return redirect($redirectUrl)->withCookie($this->getSessionCookie($newSession));
     }
 }

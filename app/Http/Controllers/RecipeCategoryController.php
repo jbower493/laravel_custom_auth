@@ -5,13 +5,21 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Models\RecipeCategory;
 use App\Models\Recipe;
+use App\Repositories\AuthedUserRepositoryInterface;
 use Illuminate\Http\Request;
 
 class RecipeCategoryController extends Controller
 {
+    protected $authedUserRepo;
+
+    public function __construct(AuthedUserRepositoryInterface $authedUserRepo)
+    {
+        $this->authedUserRepo = $authedUserRepo;
+    }
+
     public function index()
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $recipeCategories = RecipeCategory::where('user_id', $loggedInUserId)->orderBy('name')->get()->toArray();
 
@@ -25,7 +33,7 @@ class RecipeCategoryController extends Controller
 
     public function store(Request $request)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validatedRecipeCategory = $request->validate([
             'name' => ['required']

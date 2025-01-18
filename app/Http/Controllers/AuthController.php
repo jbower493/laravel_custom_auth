@@ -5,13 +5,11 @@ namespace App\Http\Controllers;
 use App\Traits\SessionTokenTrait;
 use App\Models\CustomSession as CustomSessionModel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Repositories\AuthedUserRepositoryInterface;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -57,29 +55,36 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $user = User::where('email', $credentials['email'])->first();
-            $newSession = $this->createNewSession($user->id);
+        $user = User::where('email', $credentials['email'])->first();
 
-            if ($newSession->type === CustomSessionModel::SESSION_TYPE_APP) {
-                return [
-                    'message' => 'Login successful.',
-                    'token' => $newSession->id
-                ];
-            }
-
-            $response = response([
-                'message' => 'Login successful.'
-            ]);
-
-            $this->attachSessionCookieToResponse($newSession, $response);
-
-            return $response;
+        if (!$user) {
+            return response([
+                'errors' => ['Incorrect credentials.']
+            ], 401);
         }
 
-        return response([
-            'errors' => ['Incorrect credentials.']
-        ], 401);
+        if (!Hash::check($credentials['password'], $user->password)) {
+            return response([
+                'errors' => ['Incorrect credentials.hoooa']
+            ], 401);
+        }
+
+        $newSession = $this->createNewSession($user->id);
+
+        if ($newSession->type === CustomSessionModel::SESSION_TYPE_APP) {
+            return [
+                'message' => 'Login successful.',
+                'token' => $newSession->id
+            ];
+        }
+
+        $response = response([
+            'message' => 'Login successful.'
+        ]);
+
+        $this->attachSessionCookieToResponse($newSession, $response);
+
+        return $response;
     }
 
     public function register(Request $request)
@@ -98,29 +103,27 @@ class AuthController extends Controller
         ]);
 
         // Log them straight in
-        if (Auth::attempt([
-            'email' => $newUser->email,
-            'password' => $fields['password'],
-        ])) {
-            Session::remove('additional_user_id');
-            $request->session()->regenerate();
+        $newSession = $this->createNewSession($newUser->id);
 
+        if ($newSession->type === CustomSessionModel::SESSION_TYPE_APP) {
             return [
-                'message' => 'Registration successful.'
+                'message' => 'Registration successful.',
+                'token' => $newSession->id
             ];
         }
 
-        return response([
-            'errors' => ['Something went wrong.']
-        ], 500);
+        $response = response([
+            'message' => 'Registration successful.'
+        ]);
+
+        $this->attachSessionCookieToResponse($newSession, $response);
+
+        return $response;
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        Auth::logout();
-        Session::remove('additional_user_data');
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $this->authedUserRepo->logout();
 
         return [
             'message' => 'Logout successful.'

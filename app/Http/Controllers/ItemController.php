@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Item;
 use App\Models\Category;
-use Illuminate\Support\Facades\Auth;
+use App\Repositories\AuthedUserRepositoryInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -14,9 +14,16 @@ use Illuminate\Support\Str;
 
 class ItemController extends Controller
 {
+    protected $authedUserRepo;
+
+    public function __construct(AuthedUserRepositoryInterface $authedUserRepo)
+    {
+        $this->authedUserRepo = $authedUserRepo;
+    }
+
     public function index()
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $items = Item::where('user_id', $loggedInUserId)->orderBy('name')->get()->toArray();
 
@@ -30,7 +37,7 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validator = Validator::make(
             [
@@ -110,7 +117,7 @@ class ItemController extends Controller
     {
         $categoryIdToSet = null;
 
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         // If category id is -1, set the items to uncategorized
         if ($categoryId != -1) {
@@ -157,7 +164,8 @@ class ItemController extends Controller
         ];
     }
 
-    public function uploadImage(Request $request, Item $item) {
+    public function uploadImage(Request $request, Item $item)
+    {
         $request->validate([
             // Size in kilobytes.
             'item_image' => 'required|file|mimes:jpg,jpeg,png|max:8192'
@@ -187,7 +195,7 @@ class ItemController extends Controller
 
         $newFilePath = 'item-images/' . Str::random(40) . '.webp';
         $uploadSuccessful = Storage::put($newFilePath, $processedBinaryFileData);
-        
+
         if (!$uploadSuccessful) {
             return response([
                 'errors' => ['Failed to upload image.']
@@ -216,7 +224,8 @@ class ItemController extends Controller
         ];
     }
 
-    public function removeImage(Item $item) {
+    public function removeImage(Item $item)
+    {
         $currentImagePath = $item->short_image_url;
 
         // First check if any other items are using the same image. If so, don't delete it

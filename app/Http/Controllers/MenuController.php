@@ -3,18 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Menu;
 use App\Models\Recipe;
 use App\Models\RecipeCategory;
+use App\Repositories\AuthedUserRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 class MenuController extends Controller
 {
+    protected $authedUserRepo;
+
+    public function __construct(AuthedUserRepositoryInterface $authedUserRepo)
+    {
+        $this->authedUserRepo = $authedUserRepo;
+    }
+
     public function index()
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $menus = Menu::where('user_id', $loggedInUserId)->orderBy('created_at', 'desc')->get()->toArray();
 
@@ -28,7 +35,7 @@ class MenuController extends Controller
 
     public function store(Request $request)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validatedMenu = $request->validate([
             'name' => ['required']
@@ -100,7 +107,7 @@ class MenuController extends Controller
                 'recipes' => [
                     'required',
                     function ($attribute, $value, $fail) {
-                        $loggedInUserId = Auth::id();
+                        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
                         foreach ($value as $singleRecipe) {
                             $recipeId = $singleRecipe['id'];
@@ -167,7 +174,7 @@ class MenuController extends Controller
 
     public function randomRecipesPreview(Request $request, Menu $menu)
     {
-        $loggedInUserId = Auth::id();
+        $loggedInUserId = $this->authedUserRepo->getUser()->id;
 
         $validatedRequest = Validator::make(
             [
@@ -188,7 +195,7 @@ class MenuController extends Controller
 
                             // If it's a number, it has to be the id of a recipe category that belongs to the user
                             if ($recipeId !== 'ALL_CATEGORIES') {
-                                $loggedInUserId = Auth::id();
+                                $loggedInUserId = $this->authedUserRepo->getUser()->id;
                                 $foundRecipeCategoryBelongingToLoggedInUser = RecipeCategory::where('user_id', $loggedInUserId)->where('id', $recipeId)->get()->first();
                                 if (!$foundRecipeCategoryBelongingToLoggedInUser) {
                                     $fail('Recipe categories must belong to you');
