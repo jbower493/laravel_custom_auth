@@ -14,10 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::create('custom_sessions', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->integer('type');
             $table->foreignId('additional_user_id')->nullable()->constrained('users');
+            $table->timestamp('expires_at');
             $table->timestamps();
         });
     }

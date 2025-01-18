@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use App\Traits\SessionTokenTrait;
 use App\Models\CustomSession as CustomSessionModel;
+use Carbon\Carbon;
 
 class CustomSession
 {
@@ -23,14 +24,39 @@ class CustomSession
         $token = $this->retrieveToken($request);
 
         $session = $this->retrieveSessionByToken($token);
+        $session = $this->deleteExpiredSession($session);
 
         if ($session) {
+            $session = $this->extendActiveSession($session);
             $request->attributes->set('custom_session', $session);
         }
 
         $response = $next($request);
 
         return $response;
+    }
+
+    private function deleteExpiredSession(CustomSessionModel | null $session): CustomSessionModel | null
+    {
+        if (!$session) {
+            return null;
+        }
+
+        $expiresAt = Carbon::parse($session->expires_at);
+
+        if (Carbon::now()->isAfter($expiresAt)) {
+            $session->delete();
+            return null;
+        }
+
+        return $session;
+    }
+
+    private function extendActiveSession(CustomSessionModel $session): CustomSessionModel
+    {
+        $session->expires_at = Carbon::now()->add(CustomSessionModel::SESSION_LIFETIME_HOURS, 'hour');
+        $session->save();
+        return $session;
     }
 
     private function retrieveToken(Request $request)

@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\CustomSession as CustomSessionModel;
+use Carbon\Carbon;
 
 trait SessionTokenTrait
 {
@@ -22,7 +23,8 @@ trait SessionTokenTrait
 
         $newSession = CustomSessionModel::create([
             'user_id' => $userId,
-            'type' => $sessionType
+            'type' => $sessionType,
+            'expires_at' => Carbon::now()->add(CustomSessionModel::SESSION_LIFETIME_HOURS, 'hour')
         ]);
 
         return $newSession;
