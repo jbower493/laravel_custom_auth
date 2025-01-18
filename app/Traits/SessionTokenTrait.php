@@ -30,19 +30,15 @@ trait SessionTokenTrait
         return $newSession;
     }
 
-    public function getSessionCookie(CustomSessionModel $session)
+    public function createCookie($value)
     {
-        if (!$session) {
-            return null;
-        }
-
         $sessionConfig = config('session');
 
         return new Cookie(
             // $session->getName(),
             'custom_session',
             // $$newSession->getId(),
-            $session->id,
+            $value,
             // $this->getCookieExpirationDate(),
             0,
             $sessionConfig['path'],
@@ -52,6 +48,15 @@ trait SessionTokenTrait
             false,
             $sessionConfig['same_site'] ?? null
         );
+    }
+
+    public function getSessionCookie(CustomSessionModel $session)
+    {
+        if (!$session) {
+            return null;
+        }
+
+        return $this->createCookie($session->id);
     }
 
     public function attachSessionCookieToResponse(CustomSessionModel $session, Response $response)
