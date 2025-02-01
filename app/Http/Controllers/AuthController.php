@@ -110,7 +110,9 @@ class AuthController extends Controller
         if ($newSession->type === CustomSessionModel::SESSION_TYPE_APP) {
             return [
                 'message' => 'Registration successful.',
-                'token' => $newSession->id
+                'data' => [
+                    'token' => $newSession->id
+                ]
             ];
         }
 

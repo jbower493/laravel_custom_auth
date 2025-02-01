@@ -46,7 +46,10 @@ class CategoryController extends Controller
         $category->save();
 
         return [
-            'message' => 'Category successfully created.'
+            'message' => 'Category successfully created.',
+            'data' => [
+                'category' => $category
+            ]
         ];
     }
 

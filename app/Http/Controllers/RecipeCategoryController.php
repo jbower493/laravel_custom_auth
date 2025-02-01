@@ -47,7 +47,10 @@ class RecipeCategoryController extends Controller
         $recipeCategory->save();
 
         return [
-            'message' => 'Recipe category successfully created.'
+            'message' => 'Recipe category successfully created.',
+            'data' => [
+                'recipe_category' => $recipeCategory
+            ]
         ];
     }
 
